@@ -986,7 +986,7 @@ double GiantBranch::CalculateLifetimeToHeIgnition(const double p_Mass, const dou
 /*
  * Calculate thermal timescale
  *
- * Kalogera & Webbink 1996, eq 2 [note that (61) of BSE proposes a value a factor of 10/3 greater]
+ * Kalogera & Webbink 1996, eq 2 [note that (61) of BSE proposes a value a factor of 3 smaller]
  *
  *
  * double CalculateThermalTimescale(const double p_Mass, const double p_Radius, const double p_Luminosity, const double p_EnvMass) const
@@ -1274,14 +1274,14 @@ double GiantBranch::CalculateGravitationalRemnantMass(const double p_BaryonicRem
     // then calculate GravitationalRemnantMass 
     
     if (utils::Compare(p_BaryonicRemnantMass, m_BaryonicMassOfMaximumNeutronStarMass) < 0) {
-        std::tie(error, root) = utils::SolveQuadratic(0.075, 1.0, -p_BaryonicRemnantMass);                      // Neutron Star
+        std::tie(error, root) = utils::SolveQuadratic(0.075, 1.0, -p_BaryonicRemnantMass);                 // Neutron Star
         if (error == ERROR::NO_REAL_ROOTS) { 
-            SHOW_WARN(error, "No real roots for quadratic: using 0.0");                                         // show warning
-            root = 0.0;                                                                                         // should be returned as 0.0, but set it anyway
+            SHOW_WARN(error, "No real roots for quadratic: using 0.0");                                    // show warning
+            root = 0.0;                                                                                    // should be returned as 0.0, but set it anyway
         }
     } 
-    else {
-        root = 0.9 * p_BaryonicRemnantMass;                                                                     // Black Hole
+    else {                                                                                                 // Black hole
+        root = BH::CalculateNeutrinoMassLoss_Static(p_BaryonicRemnantMass);                                // Convert to gravitational mass due to neutrino mass loss
     }
 
     return root;
