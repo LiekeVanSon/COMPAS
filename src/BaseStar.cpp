@@ -1647,7 +1647,8 @@ double BaseStar::CalculateMassLossRateOB(const double p_Teff) {
         rate = 0.0;
     }
 
-    return rate;
+    return rate/3.;                                                                                             // Lieke: reduce Vink OB-star winds by a factor of 3 (in line with clumping)
+                                                                                                                // see e.g. Smith 2004 or more recent Bjorklund 2020
 }
 
 
