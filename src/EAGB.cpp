@@ -574,7 +574,7 @@ double EAGB::CalculateMassLossRateHurley() {
     double rateNJ = CalculateMassLossRateNieuwenhuijzenDeJager();
     double rateKR = CalculateMassLossRateKudritzkiReimers();
     double rateVW = CalculateMassLossRateVassiliadisWood();
-    double rateWR = CalculateMassLossRateWolfRayet(m_Mu);
+    double rateWR = CalculateMassLossRateWolfRayetZDependent(m_Mu);
     double dominantRate;
 
     if (utils::Compare(rateNJ, rateKR) > 0) {
