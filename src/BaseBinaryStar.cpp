@@ -1616,6 +1616,8 @@ double BaseBinaryStar::CalculateGammaAngularMomentumLoss(const double p_DonorMas
         case MT_ANGULAR_MOMENTUM_LOSS_PRESCRIPTION::JEANS                : gamma = p_AccretorMass / p_DonorMass; break;
         case MT_ANGULAR_MOMENTUM_LOSS_PRESCRIPTION::ISOTROPIC_RE_EMISSION: gamma = p_DonorMass / p_AccretorMass; break;
         case MT_ANGULAR_MOMENTUM_LOSS_PRESCRIPTION::CIRCUMBINARY_RING    : gamma = (M_SQRT2 * (p_DonorMass + p_AccretorMass) * (p_DonorMass + p_AccretorMass)) / (p_DonorMass * p_AccretorMass); break; // Based on the assumption that a_ring ~= 2*a*, Vinciguerra+, 2020
+        // Lieke: I don't know if this is proper!! (are jlosses additive?? IDK)
+        case MT_ANGULAR_MOMENTUM_LOSS_PRESCRIPTION::MIXTURE              : gamma = (1. - OPTIONS->MassTransferFcirumbinaryDisk())*(p_DonorMass / p_AccretorMass) + (OPTIONS->MassTransferFcirumbinaryDisk() * (M_SQRT2 * (p_DonorMass + p_AccretorMass) * (p_DonorMass + p_AccretorMass)) / (p_DonorMass * p_AccretorMass) ); break; // (1-fcirc)*isotropic + fcirc * cricumbinary
         case MT_ANGULAR_MOMENTUM_LOSS_PRESCRIPTION::ARBITRARY            : gamma = OPTIONS->MassTransferJloss(); break;
 
         default:                                                                                                            // unknown mass transfer angular momentum loss prescription - shouldn't happen
@@ -1661,20 +1663,55 @@ double BaseBinaryStar::CalculateMassTransferOrbit(const double                 p
     double massAplusMassD  = massA + massD;                                                                     // accretor mass + donor mass
     double jOrb            = (massAtimesMassD / massAplusMassD) * std::sqrt(semiMajorAxis * G1 * massAplusMassD);    // orbital angular momentum
     double jLoss;                                                                                               // specific angular momentum carried away by non-conservative mass transfer
+
+    // Hack Lieke
+    double jLoss_iso;                                                                                            // specific angular momentum carried away by isotropic reemission
+    double jLoss_circum;                                                                                         // specific angular momentum carried away by circumbinary disk
     
     int numberIterations   = fmax( floor (fabs(p_DeltaMassDonor/(MAXIMUM_MASS_TRANSFER_FRACTION_PER_STEP*massD))), 1);   // number of iterations
 
     double dM                  = p_DeltaMassDonor / numberIterations;                                           // mass change per time step
+    SAY("\n !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   CalculateMassTransferOrbit ");
 
     for(int i = 0; i < numberIterations ; i++) {
-        
-        jLoss = CalculateGammaAngularMomentumLoss(massD, massA);
-        jOrb = jOrb + ((jLoss * jOrb * (1.0 - p_FractionAccreted) / massAplusMassD) * dM);
-        semiMajorAxis = semiMajorAxis + (((-2.0 * dM / massD) * (1.0 - (p_FractionAccreted * (massD / massA)) - ((1.0 - p_FractionAccreted) * (jLoss + 0.5) * (massD / massAplusMassD)))) * semiMajorAxis);
 
-        massD          = massD + dM;
-        massA          = massA - (dM * p_FractionAccreted);
-        massAplusMassD = massA + massD;
+        //Hack Lieke: split dM into a fraction lost from circumbinary disk and a fraction lost in reemmission
+        if (OPTIONS->MassTransferAngularMomentumLossPrescription() == MT_ANGULAR_MOMENTUM_LOSS_PRESCRIPTION::MIXTURE ) {   
+            //SAY("\nIn hack Lieke - fcirc = " << OPTIONS->MassTransferFcirumbinaryDisk());
+            //SAY("\nmassD = " << massD << " massA = " << massA << " dM = " << dM);
+            // First loose a fraction MassTransferFcirumbinaryDisk of the mass in angular momentum to a circumbinary disk
+            jLoss_circum  = (M_SQRT2 * (massD + massA) * (massD + massA)) / (massD * massA); // Based on the assumption that a_ring ~= 2*a*, Vinciguerra+, 2020
+            jOrb          = jOrb + ((jLoss_circum * jOrb * (1.0 - p_FractionAccreted) / massAplusMassD) * dM * OPTIONS->MassTransferFcirumbinaryDisk() );
+            semiMajorAxis = semiMajorAxis + (((-2.0 * dM / massD) * (1.0 - (p_FractionAccreted * (massD / massA)) - ((1.0 - p_FractionAccreted) * (jLoss_circum + 0.5) * (massD / massAplusMassD)))) * semiMajorAxis);
+            //SAY("\njLoss_circum = " << jLoss_circum << " jOrb = " << jOrb << " semiMajorAxis = " << semiMajorAxis);
+
+            massD          = massD + (dM * OPTIONS->MassTransferFcirumbinaryDisk()) ;
+            massA          = massA - (dM * OPTIONS->MassTransferFcirumbinaryDisk() * p_FractionAccreted);
+            massAplusMassD = massA + massD;
+            //SAY("\nmassD = " << massD << " massA = " << massA << " dM = " << dM << " dM * fcirc =  " << dM * OPTIONS->MassTransferFcirumbinaryDisk());
+
+            // Then loose the rest through isotropic reemmission
+            jLoss_iso     = massD / massA;
+            jOrb          = jOrb + ((jLoss_iso * jOrb * (1.0 - p_FractionAccreted) / massAplusMassD) * dM *(1. - OPTIONS->MassTransferFcirumbinaryDisk()) );
+            semiMajorAxis = semiMajorAxis + (((-2.0 * dM / massD) * (1.0 - (p_FractionAccreted * (massD / massA)) - ((1.0 - p_FractionAccreted) * (jLoss_iso + 0.5) * (massD / massAplusMassD)))) * semiMajorAxis);
+            //SAY("\njLoss_iso = " << jLoss_iso << " jOrb = " << jOrb << " semiMajorAxis = " << semiMajorAxis);
+
+            massD          = massD + (dM * (1.0 - OPTIONS->MassTransferFcirumbinaryDisk()) );
+            massA          = massA - (dM * (1.0 - OPTIONS->MassTransferFcirumbinaryDisk()) * p_FractionAccreted);
+            massAplusMassD = massA + massD;
+            //SAY("\nmassD = " << massD << " massA = " << massA << " dM = " << dM << " dM * (1-fcirc) =  " << dM * (1. - OPTIONS->MassTransferFcirumbinaryDisk()) );
+        }
+
+        else{
+            jLoss = CalculateGammaAngularMomentumLoss(massD, massA);
+            jOrb = jOrb + ((jLoss * jOrb * (1.0 - p_FractionAccreted) / massAplusMassD) * dM);
+            semiMajorAxis = semiMajorAxis + (((-2.0 * dM / massD) * (1.0 - (p_FractionAccreted * (massD / massA)) - ((1.0 - p_FractionAccreted) * (jLoss + 0.5) * (massD / massAplusMassD)))) * semiMajorAxis);
+            
+
+            massD          = massD + dM;
+            massA          = massA - (dM * p_FractionAccreted);
+            massAplusMassD = massA + massD;
+        }
     }
 
     return semiMajorAxis;
@@ -1759,7 +1796,7 @@ void BaseBinaryStar::CalculateWindsMassLoss() {
  * @param   [IN]    p_Dt                        timestep in Myr
  */
 void BaseBinaryStar::CalculateMassTransfer(const double p_Dt) {
-    
+
     InitialiseMassTransfer();                                                                                                   // initialise - even if not using mass transfer (sets some flags we might need)
     
     if (Unbound())
@@ -1811,7 +1848,7 @@ void BaseBinaryStar::CalculateMassTransfer(const double p_Dt) {
                                                                                             m_Accretor->CalculateThermalMassAcceptanceRate(CalculateRocheLobeRadius_Static(m_Accretor->Mass(), m_Donor->Mass()) * AU_TO_RSOL));
 
         if (OPTIONS->MassTransferAngularMomentumLossPrescription() != MT_ANGULAR_MOMENTUM_LOSS_PRESCRIPTION::ARBITRARY) {       // arbitrary angular momentum loss prescription?
-            jLoss = CalculateGammaAngularMomentumLoss();                                                                        // no - re-calculate angular momentum
+            jLoss = CalculateGammaAngularMomentumLoss();                                                                   // no - re-calculate angular momentum
         }
 
         m_ZetaLobe = CalculateZRocheLobe(jLoss);
@@ -1840,8 +1877,9 @@ void BaseBinaryStar::CalculateMassTransfer(const double p_Dt) {
                     
                     aFinal = CalculateMassTransferOrbit(m_Donor->Mass(), -envMassDonor, m_Donor->CalculateThermalMassLossRate(), *m_Accretor, m_FractionAccreted);
                     
+                    SAY("made it out of CalculateMassTransferOrbit aFinal = "<< aFinal);
                     m_Donor->ResolveEnvelopeLossAndSwitch();                                                                    // only other interaction that adds/removes mass is winds, so it is safe to update star here
-                    
+
                     if (m_Donor->StellarType() != stellarTypeDonor) {                                                           // stellar type change?
                         m_PrintExtraDetailedOutput = true;                                                                      // yes - print detailed output record
                     }
@@ -1854,11 +1892,16 @@ void BaseBinaryStar::CalculateMassTransfer(const double p_Dt) {
                     aFinal = CalculateMassTransferOrbit(m_Donor->Mass(), dM, m_Donor->CalculateThermalMassLossRate(), *m_Accretor, m_FractionAccreted);
                 }
                        
+                SAY("\naFinal " << aFinal);
+                SAY("\naInitial " << aInitial);
 
                 m_aMassTransferDiff = aFinal - aInitial;                                                                        // change in orbit (semi-major axis)
+                SAY("\nm_aMassTransferDiff " << m_aMassTransferDiff);
                 
                 // Check for stable mass transfer after any CEE
                 if (m_CEDetails.CEEcount > 0 && !m_RLOFDetails.stableRLOFPostCEE) {
+                    SAY("\n stable mass transfer after any CEE " );
+
                     m_RLOFDetails.stableRLOFPostCEE = m_MassTransferTrackerHistory == MT_TRACKING::STABLE_FROM_2_TO_1 ||
                                                       m_MassTransferTrackerHistory == MT_TRACKING::STABLE_FROM_1_TO_2;
                 }
