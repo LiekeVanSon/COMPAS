@@ -1954,7 +1954,7 @@ void BaseBinaryStar::InitialiseMassTransfer() {
 			    // If you don't do this, you end up modifying pre-MT pre-circularisation orbit
 			    // JR: todo: check that this is proper functionality, or just a kludge - if kludge, resolve it
 			    m_SemiMajorAxisPrev = m_SemiMajorAxis;
-			    m_EccentricityPrev = m_Eccentricity;
+			    //m_EccentricityPrev = m_Eccentricity; //Lieke: this is not needed, only sma should be set to post r_peri
 		    }
         }
     }

@@ -352,10 +352,10 @@ constexpr double KROUPA_BREAK_2_PLUS1_3                 = 2.46228882668983256899
 constexpr double KROUPA_BREAK_2_POWER_2_3               = 0.5;                                                      // pow(KROUPA_BREAK_2, (KROUPA_POWER_2 - KROUPA_POWER_3));
 
 // Constants for the Muller and Mandel remnant mass and kick prescriptions
-constexpr double MULLERMANDEL_M1                        = 2.0;	
-constexpr double MULLERMANDEL_M2                        = 3.0; 
-constexpr double MULLERMANDEL_M3                        = 7.0; 
-constexpr double MULLERMANDEL_M4                        = 8.0; 
+constexpr double MULLERMANDEL_M1                        = 2.5;	
+constexpr double MULLERMANDEL_M2                        = 2.5;//3.0; Lieke: hack to get full fallback for all BHs with 
+constexpr double MULLERMANDEL_M3                        = 2.5;//7.0; 
+constexpr double MULLERMANDEL_M4                        = 2.5;//8.0; 
 constexpr double MULLERMANDEL_MU1                       = 1.2;
 constexpr double MULLERMANDEL_SIGMA1                    = 0.02;  
 constexpr double MULLERMANDEL_MU2A                      = 1.4; 
@@ -367,9 +367,9 @@ constexpr double MULLERMANDEL_SIGMA3                    = 0.05;
 constexpr double MULLERMANDEL_MUBH                    	= 0.8;
 constexpr double MULLERMANDEL_SIGMABH                   = 0.5;
 constexpr double MULLERMANDEL_MINNS                     = 1.13;
-constexpr double MULLERMANDEL_MAXNS                     = 2.0;
+constexpr double MULLERMANDEL_MAXNS                     = 2.5;//2.0;
 constexpr double MULLERMANDEL_KICKNS                    = 400.0;
-constexpr double MULLERMANDEL_KICKBH                    = 200.0;
+constexpr double MULLERMANDEL_KICKBH                    = 0.0;//200.0;
 constexpr double MULLERMANDEL_SIGMAKICK                 = 0.3; 
 
 
