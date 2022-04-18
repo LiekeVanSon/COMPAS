@@ -583,32 +583,33 @@ double HG::CalculateCoreMassOnPhase(const double p_Mass, const double p_Time) co
     double rhoHG = CalculateRho(p_Mass);
     double tau   = (p_Time - timescales(tMS)) / (timescales(tBGB) - timescales(tMS));
     double fcore;
-    double CoremassIncreaseFactor = 1.0;//0.4/0.34; //1.;//
+    
+    double CoremassIncreaseFactor = 0.4/0.34; 
 
-    SAY("\n tau  - " << tau );
+    // SAY("\n tau  - " << tau );
 
     // Lieke: I want to mimic overshooting with some f_core. 
     SAY("\n Core mass - " <<   rhoHG * McEHG );
     fcore = (rhoHG * McEHG)/p_Mass;
-    SAY("\n Core mass fraction = " << fcore );
+    // SAY("\n Core mass fraction = " << fcore );
 
     // desired f_core is e.g. 0.4
-    SAY("\n Increased Core mass - " << CoremassIncreaseFactor * rhoHG * McEHG );
-    SAY("\n Increased Core mass fraction - " << CoremassIncreaseFactor * (rhoHG * McEHG)/p_Mass ) ;
+    // SAY("\n Increased Core mass - " << CoremassIncreaseFactor * rhoHG * McEHG );
+    // SAY("\n Increased Core mass fraction - " << CoremassIncreaseFactor * (rhoHG * McEHG)/p_Mass ) ;
 
 
-    SAY("\n Star mass  - " << p_Mass) ;
+    // SAY("\n Star mass  - " << p_Mass) ;
     // Increase the core mass but make sure it doesn't exceed the mass
     McEHG = std::min( CoremassIncreaseFactor * McEHG, p_Mass) ;
 
-    if (tau == 0.){ // Inspect core mass at TAMS
-        SAY("\n tau  - " << tau << " (should be 0 ) ");
-        SAY("\n m_CoreMass from previous time step  - " << m_CoreMass << " (should be 0 ) " );
+    // if (tau == 0.){ // Inspect core mass at TAMS
+    //     SAY("\n tau  - " << tau << " (should be 0 ) ");
+    //     SAY("\n m_CoreMass from previous time step  - " << m_CoreMass << " (should be 0 ) " );
         
-        SAY("\n Core mass at TAMS - " << rhoHG * McEHG );
-        SAY("\n rhoHG - " << rhoHG  );
+    //     SAY("\n Core mass at TAMS - " << rhoHG * McEHG );
+    //     SAY("\n rhoHG - " << rhoHG  );
 
-    }
+    // }
 
 
     // If the star is losing mass, choose core mass as the maximum of the core mass

@@ -552,12 +552,12 @@ double EAGB::CalculateCOCoreMassOnPhase(const double p_Time) const {
 #define gbParams(x) m_GBParams[static_cast<int>(GBP::x)]    // for convenience and readability - undefined at end of function
 
     // Lieke (intend to change something here)
-    double CoremassIncreaseFactor = 1.0;//0.4/0.34;
+    double CoremassIncreaseFactor = 0.4/0.34;
 
 
     return utils::Compare(p_Time, timescales(tMx_FAGB)) <= 0
-            ? CoremassIncreaseFactor * PPOW((gbParams(p) - 1.0) * gbParams(AHe) * gbParams(D) * (timescales(tinf1_FAGB) - p_Time), 1.0 / (1.0 - gbParams(p)))
-            : CoremassIncreaseFactor * PPOW((gbParams(q) - 1.0) * gbParams(AHe) * gbParams(B) * (timescales(tinf2_FAGB) - p_Time), 1.0 / (1.0 - gbParams(q)));
+            ?  PPOW((gbParams(p) - 1.0) * gbParams(AHe) * gbParams(D) * (timescales(tinf1_FAGB) - p_Time), 1.0 / (1.0 - gbParams(p)))
+            :  PPOW((gbParams(q) - 1.0) * gbParams(AHe) * gbParams(B) * (timescales(tinf2_FAGB) - p_Time), 1.0 / (1.0 - gbParams(q)));
 
 #undef gbParams
 #undef timescales

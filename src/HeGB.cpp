@@ -197,7 +197,7 @@ double HeGB::CalculateCoreMassOnPhase_Static(const double      p_Mass,
 #define gbParams(x) p_GBParams[static_cast<int>(GBP::x)]// for convenience and readability - undefined at end of function
 
     // Lieke (intend to change something here)
-    double CoremassIncreaseFactor = 1.0;//0.4/0.34;
+    double CoremassIncreaseFactor = 0.4/0.34;
 
     double coreMass;
 
