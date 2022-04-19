@@ -1676,13 +1676,12 @@ double BaseBinaryStar::CalculateMassTransferOrbit(const double                 p
     int numberIterations   = fmax( floor (fabs(p_DeltaMassDonor/(MAXIMUM_MASS_TRANSFER_FRACTION_PER_STEP*massD))), 1);   // number of iterations
 
     double dM                  = p_DeltaMassDonor / numberIterations;                                           // mass change per time step
-    SAY("\n !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   CalculateMassTransferOrbit ");
 
     for(int i = 0; i < numberIterations ; i++) {
 
         //Hack Lieke: split dM into a fraction lost from circumbinary disk and a fraction lost in reemmission
         if (OPTIONS->MassTransferAngularMomentumLossPrescription() == MT_ANGULAR_MOMENTUM_LOSS_PRESCRIPTION::MIXTURE ) {   
-            SAY("\nIn hack Lieke - fcirc = " << OPTIONS->MassTransferFcirumbinaryDisk());
+            //SAY("\nIn hack Lieke - fcirc = " << OPTIONS->MassTransferFcirumbinaryDisk());
 
             // The mass change per timestep is divived
             dMcircum = dM * OPTIONS->MassTransferFcirumbinaryDisk();
@@ -1701,7 +1700,6 @@ double BaseBinaryStar::CalculateMassTransferOrbit(const double                 p
             da_circum = ( semiMajorAxis * ((-2.0 * dMcircum / massD) * (1.0 - (p_FractionAccreted * (massD / massA)) - ((1.0 - p_FractionAccreted) * (jLoss_circum + 0.5) * (massD / massAplusMassD))) ) );
             semiMajorAxis = semiMajorAxis + da_iso + da_circum;
 
-            //SAY("\nmassD = " << massD << " massA = " << massA << " dM = " << dM);
         }
 
         else{
@@ -1880,7 +1878,7 @@ void BaseBinaryStar::CalculateMassTransfer(const double p_Dt) {
                     
                     aFinal = CalculateMassTransferOrbit(m_Donor->Mass(), -envMassDonor, m_Donor->CalculateThermalMassLossRate(), *m_Accretor, m_FractionAccreted);
                     
-                    SAY("made it out of CalculateMassTransferOrbit aFinal = "<< aFinal);
+                    // Lieke: SAY("made it out of CalculateMassTransferOrbit aFinal = "<< aFinal);
                     m_Donor->ResolveEnvelopeLossAndSwitch();                                                                    // only other interaction that adds/removes mass is winds, so it is safe to update star here
 
                     if (m_Donor->StellarType() != stellarTypeDonor) {                                                           // stellar type change?
@@ -1895,15 +1893,10 @@ void BaseBinaryStar::CalculateMassTransfer(const double p_Dt) {
                     aFinal = CalculateMassTransferOrbit(m_Donor->Mass(), dM, m_Donor->CalculateThermalMassLossRate(), *m_Accretor, m_FractionAccreted);
                 }
                        
-                SAY("\naFinal " << aFinal);
-                SAY("\naInitial " << aInitial);
-
                 m_aMassTransferDiff = aFinal - aInitial;                                                                        // change in orbit (semi-major axis)
-                SAY("\nm_aMassTransferDiff " << m_aMassTransferDiff);
                 
                 // Check for stable mass transfer after any CEE
                 if (m_CEDetails.CEEcount > 0 && !m_RLOFDetails.stableRLOFPostCEE) {
-                    SAY("\n stable mass transfer after any CEE " );
 
                     m_RLOFDetails.stableRLOFPostCEE = m_MassTransferTrackerHistory == MT_TRACKING::STABLE_FROM_2_TO_1 ||
                                                       m_MassTransferTrackerHistory == MT_TRACKING::STABLE_FROM_1_TO_2;
