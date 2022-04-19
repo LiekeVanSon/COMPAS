@@ -1665,9 +1665,14 @@ double BaseBinaryStar::CalculateMassTransferOrbit(const double                 p
     double jLoss;                                                                                               // specific angular momentum carried away by non-conservative mass transfer
 
     // Hack Lieke
+    double dMiso;                                                                                                // mass change per time step that is isotropically reemitted
+    double dMcircum;                                                                                             // mass change per time step that is send to circumbinary disk
+
     double jLoss_iso;                                                                                            // specific angular momentum carried away by isotropic reemission
     double jLoss_circum;                                                                                         // specific angular momentum carried away by circumbinary disk
-    
+    double da_iso;                                                                                               // change in semi major axis for the isotropic wind
+    double da_circum;                                                                                            // change in semi major axis for the circumbinary disk
+
     int numberIterations   = fmax( floor (fabs(p_DeltaMassDonor/(MAXIMUM_MASS_TRANSFER_FRACTION_PER_STEP*massD))), 1);   // number of iterations
 
     double dM                  = p_DeltaMassDonor / numberIterations;                                           // mass change per time step
@@ -1677,29 +1682,26 @@ double BaseBinaryStar::CalculateMassTransferOrbit(const double                 p
 
         //Hack Lieke: split dM into a fraction lost from circumbinary disk and a fraction lost in reemmission
         if (OPTIONS->MassTransferAngularMomentumLossPrescription() == MT_ANGULAR_MOMENTUM_LOSS_PRESCRIPTION::MIXTURE ) {   
-            //SAY("\nIn hack Lieke - fcirc = " << OPTIONS->MassTransferFcirumbinaryDisk());
-            //SAY("\nmassD = " << massD << " massA = " << massA << " dM = " << dM);
-            // First loose a fraction MassTransferFcirumbinaryDisk of the mass in angular momentum to a circumbinary disk
-            jLoss_circum  = (M_SQRT2 * (massD + massA) * (massD + massA)) / (massD * massA); // Based on the assumption that a_ring ~= 2*a*, Vinciguerra+, 2020
-            jOrb          = jOrb + ((jLoss_circum * jOrb * (1.0 - p_FractionAccreted) / massAplusMassD) * dM * OPTIONS->MassTransferFcirumbinaryDisk() );
-            semiMajorAxis = semiMajorAxis + (((-2.0 * dM / massD) * (1.0 - (p_FractionAccreted * (massD / massA)) - ((1.0 - p_FractionAccreted) * (jLoss_circum + 0.5) * (massD / massAplusMassD)))) * semiMajorAxis);
-            //SAY("\njLoss_circum = " << jLoss_circum << " jOrb = " << jOrb << " semiMajorAxis = " << semiMajorAxis);
+            SAY("\nIn hack Lieke - fcirc = " << OPTIONS->MassTransferFcirumbinaryDisk());
 
-            massD          = massD + (dM * OPTIONS->MassTransferFcirumbinaryDisk()) ;
-            massA          = massA - (dM * OPTIONS->MassTransferFcirumbinaryDisk() * p_FractionAccreted);
-            massAplusMassD = massA + massD;
-            //SAY("\nmassD = " << massD << " massA = " << massA << " dM = " << dM << " dM * fcirc =  " << dM * OPTIONS->MassTransferFcirumbinaryDisk());
+            // The mass change per timestep is divived
+            dMcircum = dM * OPTIONS->MassTransferFcirumbinaryDisk();
+            dMiso    = dM * (1.0 - OPTIONS->MassTransferFcirumbinaryDisk() );
 
-            // Then loose the rest through isotropic reemmission
+            // We need to caluculate both gammas (asusming dm is small enough that this is allowed)
             jLoss_iso     = massD / massA;
-            jOrb          = jOrb + ((jLoss_iso * jOrb * (1.0 - p_FractionAccreted) / massAplusMassD) * dM *(1. - OPTIONS->MassTransferFcirumbinaryDisk()) );
-            semiMajorAxis = semiMajorAxis + (((-2.0 * dM / massD) * (1.0 - (p_FractionAccreted * (massD / massA)) - ((1.0 - p_FractionAccreted) * (jLoss_iso + 0.5) * (massD / massAplusMassD)))) * semiMajorAxis);
-            //SAY("\njLoss_iso = " << jLoss_iso << " jOrb = " << jOrb << " semiMajorAxis = " << semiMajorAxis);
+            jLoss_circum  = (M_SQRT2 * (massD + massA) * (massD + massA)) / (massD * massA); // Based on the assumption that a_ring ~= 2*a*, Vinciguerra+, 2020
 
-            massD          = massD + (dM * (1.0 - OPTIONS->MassTransferFcirumbinaryDisk()) );
-            massA          = massA - (dM * (1.0 - OPTIONS->MassTransferFcirumbinaryDisk()) * p_FractionAccreted);
-            massAplusMassD = massA + massD;
-            //SAY("\nmassD = " << massD << " massA = " << massA << " dM = " << dM << " dM * (1-fcirc) =  " << dM * (1. - OPTIONS->MassTransferFcirumbinaryDisk()) );
+            // The lost j is divided over an isotropic 'wind' and a circumbinary disk
+            jOrb = jOrb + ((jLoss_iso * jOrb * (1.0 - p_FractionAccreted) / massAplusMassD) * dMiso) + ((jLoss_circum * jOrb * (1.0 - p_FractionAccreted) / massAplusMassD) * dMcircum);
+
+            // Eq. 16.8 from Pols lecture notes
+            //potential things that changed: dM (for sure) j_loss (for sure) p_FractionAccreted = beta (might be counting twice), 
+            da_iso    = ( semiMajorAxis * ((-2.0 * dMiso / massD) * (1.0 - (p_FractionAccreted * (massD / massA)) - ((1.0 - p_FractionAccreted) * (jLoss_iso + 0.5) * (massD / massAplusMassD))) ) );
+            da_circum = ( semiMajorAxis * ((-2.0 * dMcircum / massD) * (1.0 - (p_FractionAccreted * (massD / massA)) - ((1.0 - p_FractionAccreted) * (jLoss_circum + 0.5) * (massD / massAplusMassD))) ) );
+            semiMajorAxis = semiMajorAxis + da_iso + da_circum;
+
+            //SAY("\nmassD = " << massD << " massA = " << massA << " dM = " << dM);
         }
 
         else{
@@ -1707,11 +1709,12 @@ double BaseBinaryStar::CalculateMassTransferOrbit(const double                 p
             jOrb = jOrb + ((jLoss * jOrb * (1.0 - p_FractionAccreted) / massAplusMassD) * dM);
             semiMajorAxis = semiMajorAxis + (((-2.0 * dM / massD) * (1.0 - (p_FractionAccreted * (massD / massA)) - ((1.0 - p_FractionAccreted) * (jLoss + 0.5) * (massD / massAplusMassD)))) * semiMajorAxis);
             
-
-            massD          = massD + dM;
-            massA          = massA - (dM * p_FractionAccreted);
-            massAplusMassD = massA + massD;
         }
+
+        // update your masses 
+        massD          = massD + dM;
+        massA          = massA - (dM * p_FractionAccreted);
+        massAplusMassD = massA + massD;
     }
 
     return semiMajorAxis;

@@ -187,13 +187,16 @@ class pythonProgramOptions:
 
     circularise_binary_during_mass_transfer = True
     angular_momentum_conservation_during_circularisation = False
+
     mass_transfer_angular_momentum_loss_prescription = 'ISOTROPIC'
     mass_transfer_accretion_efficiency_prescription = 'THERMAL'
     mass_transfer_fa = 0.5                                      # Only if using mass_transfer_accretion_efficiency_prescription = 'FIXED'
     mass_transfer_jloss = 1.0                                   # Only if using mass_transfer_angular_momentum_loss_prescription = 'FIXED'
+    mass_transfer_angular_momentum_fcircumb = 0.0               # Only if using mass_transfer_angular_momentum_loss_prescription = 'MIXTURE'
+
     mass_transfer_rejuvenation_prescription = 'STARTRACK'
     mass_transfer_thermal_limit_accretor= 'CFACTOR'
-    mass_transfer_thermal_limit_C= 10.0
+    mass_transfer_thermal_limit_C = 10.0
     eddington_accretion_factor = 1                              # multiplication Factor for eddington accretion onto NS&BH
 
     case_BB_stability_prescription = 'ALWAYS_STABLE'
@@ -422,6 +425,7 @@ class pythonProgramOptions:
             self.cool_wind_mass_loss_multiplier,
             self.mass_transfer_fa,
             self.mass_transfer_jloss,
+            self.mass_transfer_angular_momentum_fcircumb,
             self.maximum_evolution_time,
             self.maximum_number_timesteps,
             self.timestep_multiplier,
@@ -513,6 +517,7 @@ class pythonProgramOptions:
             '--cool-wind-mass-loss-multiplier',
             '--mass-transfer-fa',
             '--mass-transfer-jloss',
+            '--mass-transfer-fcircumb',
             '--maximum-evolution-time',
             '--maximum-number-timestep-iterations',
             '--timestep-multiplier',
