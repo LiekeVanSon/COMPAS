@@ -873,7 +873,11 @@ double CHeB::CalculateCoreMassOnPhase(const double p_Mass, const double p_Tau) c
 
     // Lieke (intend to change something here)
     double CoremassIncreaseFactor = 0.4/0.34; 
+    double coremass; 
 
+    coremass = CoremassIncreaseFactor * (((1.0 - p_Tau) * CalculateCoreMassAtHeIgnition(p_Mass)) + (p_Tau * CalculateCoreMassAtBAGB(p_Mass)));
+    // SAY("\n In CHeB.cpp  CalculateCoreMassOnPhase - "  );
+    // SAY("\n coremass = "  << coremass );
 
     return std::min( CoremassIncreaseFactor * (((1.0 - p_Tau) * CalculateCoreMassAtHeIgnition(p_Mass)) + (p_Tau * CalculateCoreMassAtBAGB(p_Mass))) , m_Mass);               //He mass capped at total mass (should become HeMS star)
 

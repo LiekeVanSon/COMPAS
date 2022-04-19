@@ -583,10 +583,10 @@ double HG::CalculateCoreMassOnPhase(const double p_Mass, const double p_Time) co
     double rhoHG = CalculateRho(p_Mass);
     double tau   = (p_Time - timescales(tMS)) / (timescales(tBGB) - timescales(tMS));
     double fcore;
-    
+
     double CoremassIncreaseFactor = 0.4/0.34; 
 
-    // SAY("\n tau  - " << tau );
+    SAY("\n in HG.cpp  - CalculateCoreMassOnPhase"  );
 
     // Lieke: I want to mimic overshooting with some f_core. 
     SAY("\n Core mass - " <<   rhoHG * McEHG );

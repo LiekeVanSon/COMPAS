@@ -217,6 +217,9 @@ double HeGB::CalculateCoreMassOnPhase_Static(const double      p_Mass,
         coreMass = PPOW(p1 * gbParams(AHe) * gbParams(D) * (tinf1 - p_Time), 1.0 / (1.0 - gbParams(p)));
     }
 
+    // SAY("\n In HeGB.cpp  CalculateCoreMassOnPhase_Static - "  );
+    // SAY("\n CoremassIncreaseFactor * coreMass = "  << CoremassIncreaseFactor * coreMass );
+
     return CoremassIncreaseFactor * coreMass;
 
 #undef gbParams

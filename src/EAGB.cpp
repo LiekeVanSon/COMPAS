@@ -554,6 +554,8 @@ double EAGB::CalculateCOCoreMassOnPhase(const double p_Time) const {
     // Lieke (intend to change something here)
     double CoremassIncreaseFactor = 0.4/0.34;
 
+    SAY("\n In EAGB.cpp  CalculateCOCoreMassOnPhase - "  );
+
 
     return utils::Compare(p_Time, timescales(tMx_FAGB)) <= 0
             ?  PPOW((gbParams(p) - 1.0) * gbParams(AHe) * gbParams(D) * (timescales(tinf1_FAGB) - p_Time), 1.0 / (1.0 - gbParams(p)))

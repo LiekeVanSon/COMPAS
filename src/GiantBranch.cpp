@@ -260,6 +260,7 @@ void GiantBranch::CalculateGBParams(const double p_Mass, DBL_VECTOR &p_GBParams)
     // Lieke (intend to change something here)
     double CoremassIncreaseFactor = 0.4/0.34; 
 
+
     gbParams(AH)     = CalculateHRateConstant_Static(p_Mass);
     gbParams(AHHe)   = CalculateHHeRateConstant_Static();
     gbParams(AHe)    = CalculateHeRateConstant_Static();
@@ -273,11 +274,15 @@ void GiantBranch::CalculateGBParams(const double p_Mass, DBL_VECTOR &p_GBParams)
     gbParams(Mx)     = CalculateCoreMass_Luminosity_Mx_Static(p_GBParams);      // depends on B, D, p & q - recalculate if any of those are changed
     gbParams(Lx)     = CalculateCoreMass_Luminosity_Lx_Static(p_GBParams);      // JR: Added this - depends on B, D, p, q & Mx - recalculate if any of those are changed
 
-    gbParams(McBAGB) = CoremassIncreaseFactor * CalculateCoreMassAtBAGB(p_Mass);
-    gbParams(McDU)   = CoremassIncreaseFactor * CalculateCoreMassAt2ndDredgeUp_Static(gbParams(McBAGB));
-    gbParams(McBGB)  = CoremassIncreaseFactor * CalculateCoreMassAtBGB(p_Mass, p_GBParams);
+    gbParams(McBAGB) = CalculateCoreMassAtBAGB(p_Mass);
+    gbParams(McDU)   = CalculateCoreMassAt2ndDredgeUp_Static(gbParams(McBAGB));
+    gbParams(McBGB)  = CalculateCoreMassAtBGB(p_Mass, p_GBParams);
 
-    gbParams(McSN)   = CoremassIncreaseFactor * CalculateCoreMassAtSupernova_Static(gbParams(McBAGB));   // JR: Added this
+    gbParams(McSN)   = CalculateCoreMassAtSupernova_Static(gbParams(McBAGB));   // JR: Added this
+
+    // SAY("\n In GiantBranch.cpp  CalculateGBParams - "  );
+    // SAY("\n IgbParams(McBAGB) = " <<   gbParams(McBAGB) );
+
 
 #undef gbParams
 }
