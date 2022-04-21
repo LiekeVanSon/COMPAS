@@ -35,13 +35,15 @@ protected:
         m_Age = m_Timescales[static_cast<int>(TIMESCALE::tBGB)];                                                                                                                                    // Set age appropriately
     }
 
+    // Lieke (intend to change something here)
+    double CoremassIncreaseFactor = 0.4/0.34; 
 
     // member functions - alphabetically
     double          CalculateCOCoreMassAtPhaseEnd() const                                           { return CalculateCOCoreMassOnPhase(); }                                                        // Same as on phase
     double          CalculateCOCoreMassOnPhase() const                                              { return 0.0; }                                                                                 // McCO(FGB) = 0.0
 
     double          CalculateCoreMassAtPhaseEnd(const double p_Mass, const double p_Time) const     { return CalculateCoreMassOnPhase(p_Mass, p_Time); }                                            // Same as on phase
-    double          CalculateCoreMassAtPhaseEnd() const                                             { return CalculateCoreMassAtPhaseEnd(m_Mass0, m_Age); }                                         // Use class member variables
+    double          CalculateCoreMassAtPhaseEnd() const                                             { return CalculateCoreMassAtPhaseEnd(CoremassIncreaseFactor * m_Mass0, m_Age); }                                         // Use class member variables
     double          CalculateCoreMassOnPhase(const double p_Mass, const double p_Time) const;
     double          CalculateCoreMassOnPhase() const                                                { return CalculateCoreMassOnPhase(m_Mass0, m_Age); }                                            // Use class member variables
 

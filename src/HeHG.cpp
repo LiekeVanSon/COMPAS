@@ -218,7 +218,7 @@ std::tuple <double, STELLAR_TYPE> HeHG::CalculateRadiusAndStellarTypeOnPhase(con
 double HeHG::CalculateCOCoreMassOnPhase() const {
 #define timescales(x) m_Timescales[static_cast<int>(TIMESCALE::x)]  // for convenience and readability - undefined at end of function
 
-    return HeGB::CalculateCoreMassOnPhase_Static(m_Mass0, m_Age, timescales(tHeMS), m_GBParams);
+    return HeGB::CalculateCoreMassOnPhase_Static( m_Mass0, m_Age, timescales(tHeMS), m_GBParams);
 
 #undef timescales
 }

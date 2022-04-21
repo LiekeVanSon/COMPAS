@@ -257,10 +257,6 @@ double GiantBranch::CalculateCoreMass_Luminosity_Lx_Static(const DBL_VECTOR &p_G
 void GiantBranch::CalculateGBParams(const double p_Mass, DBL_VECTOR &p_GBParams) {
 #define gbParams(x) p_GBParams[static_cast<int>(GBP::x)]    // for convenience and readability - undefined at end of function
 
-    // Lieke (intend to change something here)
-    double CoremassIncreaseFactor = 0.4/0.34; 
-
-
     gbParams(AH)     = CalculateHRateConstant_Static(p_Mass);
     gbParams(AHHe)   = CalculateHHeRateConstant_Static();
     gbParams(AHe)    = CalculateHeRateConstant_Static();
@@ -855,9 +851,6 @@ double GiantBranch::CalculateCoreMassAtSupernova_Static(const double p_McBAGB) {
 double GiantBranch::CalculateCoreMassAtHeIgnition(const double p_Mass) const {
 #define massCutoffs(x) m_MassCutoffs[static_cast<int>(MASS_CUTOFF::x)]  // for convenience and readability - undefined at end of function
 
-    // Lieke (intend to change something here)
-    double CoremassIncreaseFactor = 0.4/0.34; 
-
     double coreMass;
 
     if (utils::Compare(p_Mass, massCutoffs(MHeF)) < 0) {
@@ -868,10 +861,10 @@ double GiantBranch::CalculateCoreMassAtHeIgnition(const double p_Mass) const {
     else {
         double luminosity_MHeF = CalculateLuminosityAtHeIgnition_Static(massCutoffs(MHeF), m_Alpha1, massCutoffs(MHeF), m_BnCoefficients);
         double Mc_MHeF         = BaseStar::CalculateCoreMassGivenLuminosity_Static(luminosity_MHeF, m_GBParams);
-        double McBAGB          = CoremassIncreaseFactor * CalculateCoreMassAtBAGB(p_Mass);
+        double McBAGB          = CalculateCoreMassAtBAGB(p_Mass);
         double c               = (Mc_MHeF * Mc_MHeF * Mc_MHeF * Mc_MHeF) - (MC_L_C1 * PPOW(massCutoffs(MHeF), MC_L_C2)); // pow() is slow - use multiplication
 
-        coreMass               = std::min((0.95 * McBAGB), CoremassIncreaseFactor * std::sqrt(std::sqrt(c + (MC_L_C1 * PPOW(p_Mass, MC_L_C2)))));           // sqrt() is much faster than PPOW()
+        coreMass               = std::min((0.95 * McBAGB), std::sqrt(std::sqrt(c + (MC_L_C1 * PPOW(p_Mass, MC_L_C2)))));           // sqrt() is much faster than PPOW()
     }
 
     return  coreMass;

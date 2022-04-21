@@ -871,15 +871,13 @@ double CHeB::CalculateRemnantRadius() const {
  */
 double CHeB::CalculateCoreMassOnPhase(const double p_Mass, const double p_Tau) const {
 
-    // Lieke (intend to change something here)
-    double CoremassIncreaseFactor = 0.4/0.34; 
     double coremass; 
 
-    coremass = CoremassIncreaseFactor * (((1.0 - p_Tau) * CalculateCoreMassAtHeIgnition(p_Mass)) + (p_Tau * CalculateCoreMassAtBAGB(p_Mass)));
+    coremass =  (((1.0 - p_Tau) * CalculateCoreMassAtHeIgnition(p_Mass)) + (p_Tau * CalculateCoreMassAtBAGB(p_Mass)));
     // SAY("\n In CHeB.cpp  CalculateCoreMassOnPhase - "  );
     // SAY("\n coremass = "  << coremass );
 
-    return std::min( CoremassIncreaseFactor * (((1.0 - p_Tau) * CalculateCoreMassAtHeIgnition(p_Mass)) + (p_Tau * CalculateCoreMassAtBAGB(p_Mass))) , m_Mass);               //He mass capped at total mass (should become HeMS star)
+    return std::min( (((1.0 - p_Tau) * CalculateCoreMassAtHeIgnition(p_Mass)) + (p_Tau * CalculateCoreMassAtBAGB(p_Mass))) , m_Mass);               //He mass capped at total mass (should become HeMS star)
 
 }
 
@@ -1138,6 +1136,7 @@ double CHeB::ChooseTimestep(const double p_Time) const {
  */
 STELLAR_TYPE CHeB::ResolveEnvelopeLoss(bool p_NoCheck) {
 #define timescales(x) m_Timescales[static_cast<int>(TIMESCALE::x)]  // for convenience and readability - undefined at end of function
+
 
     STELLAR_TYPE stellarType = m_StellarType;
 

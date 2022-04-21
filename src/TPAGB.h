@@ -35,10 +35,12 @@ protected:
         m_Age = m_Timescales[static_cast<int>(TIMESCALE::tP)];                                                                                                                                              // Set age appropriately
    }
 
+    // Lieke (intend to change something here)
+    double CoremassIncreaseFactor = 0.4/0.34; 
 
    // member functions - alphabetically
             double          CalculateCOCoreMassAtPhaseEnd() const                                                   { return (utils::Compare(m_COCoreMass, m_GBParams[static_cast<int>(GBP::McSN)]) >= 0 && utils::Compare(m_COCoreMass, m_Mass) < 0) ? m_COCoreMass : m_Mass; }
-            double          CalculateCOCoreMassOnPhase() const                                                      { return CalculateCoreMassOnPhase(m_Mass0, m_Age); }                                    // McCO(TPAGB) = Mc(TPAGB)Same as on phase
+            double          CalculateCOCoreMassOnPhase() const                                                      { return CalculateCoreMassOnPhase(CoremassIncreaseFactor * m_Mass0, m_Age); }                                    // McCO(TPAGB) = Mc(TPAGB)Same as on phase
 
             double          CalculateCoreMassAtPhaseEnd() const                                                     { return m_CoreMass; }                                                                  // NO-OP
             double          CalculateCoreMassOnPhase(const double p_Mass, const double p_Time) const;

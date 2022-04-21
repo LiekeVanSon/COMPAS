@@ -48,12 +48,14 @@ protected:
         std::tie(m_Radius, std::ignore) = CalculateRadiusAndStellarTypeOnPhase();   // Update radius
     }
 
+    // Lieke (intend to change something here)
+    double CoremassIncreaseFactor = 0.4/0.34; 
 
     // member functions - aphabetically
             double          CalculateCOCoreMassAtPhaseEnd() const                                                   { return m_COCoreMass; }                                                // NO-OP
             double          CalculateCOCoreMassOnPhase() const;
 
-            double          CalculateCoreMassAtBAGB() const                                                         { return m_Mass0; }                                                     // McBAGB = M0 (Hurely et al. 2000, discussion just before eq 89)
+            double          CalculateCoreMassAtBAGB() const                                                         { return CoremassIncreaseFactor * m_Mass0; }                                                     // McBAGB = M0 (Hurely et al. 2000, discussion just before eq 89)
             double          CalculateCoreMassAtPhaseEnd() const                                                     { return m_CoreMass; }                                                  // NO-OP
             double          CalculateCoreMassOnPhase() const                                                        { return m_COCoreMass; }                                                // Mc(HeMS) = McCOMass
 
@@ -61,7 +63,7 @@ protected:
     static  double          CalculateCoreMass_Luminosity_D_Static(const double p_Mass)                              { return 5.5E4 / (1.0 + (0.4 * p_Mass * p_Mass * p_Mass * p_Mass)); }   // pow() is slow - use multiplication
 
             void            CalculateGBParams(const double p_Mass, DBL_VECTOR &p_GBParams);
-            void            CalculateGBParams()                                                                     { CalculateGBParams(m_Mass0, m_GBParams); }                             // Use class member variables
+            void            CalculateGBParams()                                                                     { CalculateGBParams(CoremassIncreaseFactor * m_Mass0, m_GBParams); }                             // Use class member variables
 
             double          CalculateGyrationRadius() const                                                         { return 0.21; }                                                        // Hurley et al., 2000, after eq 109 for n=3/2 polytrope or dense convective core. Single number approximation.
 

@@ -584,7 +584,6 @@ double HG::CalculateCoreMassOnPhase(const double p_Mass, const double p_Time) co
     double tau   = (p_Time - timescales(tMS)) / (timescales(tBGB) - timescales(tMS));
     double fcore;
 
-    double CoremassIncreaseFactor = 0.4/0.34; 
 
     SAY("\n in HG.cpp  - CalculateCoreMassOnPhase"  );
 
@@ -593,24 +592,8 @@ double HG::CalculateCoreMassOnPhase(const double p_Mass, const double p_Time) co
     fcore = (rhoHG * McEHG)/p_Mass;
     // SAY("\n Core mass fraction = " << fcore );
 
-    // desired f_core is e.g. 0.4
-    // SAY("\n Increased Core mass - " << CoremassIncreaseFactor * rhoHG * McEHG );
-    // SAY("\n Increased Core mass fraction - " << CoremassIncreaseFactor * (rhoHG * McEHG)/p_Mass ) ;
-
-
-    // SAY("\n Star mass  - " << p_Mass) ;
     // Increase the core mass but make sure it doesn't exceed the mass
-    McEHG = std::min( CoremassIncreaseFactor * McEHG, p_Mass) ;
-
-    // if (tau == 0.){ // Inspect core mass at TAMS
-    //     SAY("\n tau  - " << tau << " (should be 0 ) ");
-    //     SAY("\n m_CoreMass from previous time step  - " << m_CoreMass << " (should be 0 ) " );
-        
-    //     SAY("\n Core mass at TAMS - " << rhoHG * McEHG );
-    //     SAY("\n rhoHG - " << rhoHG  );
-
-    // }
-
+    McEHG = std::min( McEHG, p_Mass) ;
 
     // If the star is losing mass, choose core mass as the maximum of the core mass
     // at the previous time-step and the value given by Hurley et al. 2000, eq 30

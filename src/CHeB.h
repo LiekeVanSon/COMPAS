@@ -57,15 +57,18 @@ protected:
     }
 
 
+    // Lieke (intend to change something here)
+    double CoremassIncreaseFactor = 0.4/0.34; 
+
     // member functions - alphabetically
 
     double          CalculateBluePhaseFBL(const double p_Mass);
 
     double          CalculateCOCoreMassOnPhase() const                          { return 0.0; }                                                                 // McCO(CHeB) = 0.0
 
-    double          CalculateCoreMassAtPhaseEnd() const                         { return CalculateCoreMassAtBAGB(m_Mass0); }                                    // Use class member variables
+    double          CalculateCoreMassAtPhaseEnd() const                         { return CalculateCoreMassAtBAGB(CoremassIncreaseFactor * m_Mass0); }                                    // Use class member variables
     double          CalculateCoreMassOnPhase(const double p_Mass, const double p_Tau) const;
-    double          CalculateCoreMassOnPhase() const                            { return CalculateCoreMassOnPhase(m_Mass0, m_Tau); }                            // Use class member variables
+    double          CalculateCoreMassOnPhase() const                            { return CalculateCoreMassOnPhase(CoremassIncreaseFactor * m_Mass0, m_Tau); }                            // Use class member variables
 
     double          CalculateHeCoreMassAtPhaseEnd() const                       { return m_CoreMass; }
 

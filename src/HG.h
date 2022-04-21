@@ -47,6 +47,8 @@ protected:
         std::tie(m_Radius, std::ignore) = CalculateRadiusAndStellarTypeOnPhase();   // Update radius
     }
 
+    // Lieke (intend to change something here)
+    double CoremassIncreaseFactor = 0.4/0.34; 
 
     // member functions - alphabetically
     double          CalculateCOCoreMassAtPhaseEnd() const                           { return 0.0; }                                                                             // McCO(HG) = 0.0
@@ -54,9 +56,9 @@ protected:
 
     double          CalculateCoreMassAt2ndDredgeUp(const DBL_VECTOR &p_GBParams)    { return p_GBParams[static_cast<int>(GBP::McDU)]; }                                         // NO-OP
     double          CalculateCoreMassAtPhaseEnd(const double p_Mass) const;
-    double          CalculateCoreMassAtPhaseEnd() const                             { return CalculateCoreMassAtPhaseEnd(m_Mass0); }                                            // Use class member variables
+    double          CalculateCoreMassAtPhaseEnd() const                             { return CalculateCoreMassAtPhaseEnd(CoremassIncreaseFactor * m_Mass0); }                                            // Use class member variables
     double          CalculateCoreMassOnPhase(const double p_Mass, const double p_Time) const;
-    double          CalculateCoreMassOnPhase() const                                { return CalculateCoreMassOnPhase(m_Mass0, m_Age); }                                        // Use class member variables
+    double          CalculateCoreMassOnPhase() const                                { return CalculateCoreMassOnPhase(CoremassIncreaseFactor * m_Mass0, m_Age); }               // Lieke: trying to increase core mass fraction // Use class member variables
 
     double          CalculateGyrationRadius() const                                 { return 0.21; }                                                                            // Hurley et al., 2000, after eq 109 for n=3/2 polytrope or dense convective core. Single number approximation.
 
