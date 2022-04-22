@@ -35,16 +35,13 @@ protected:
         m_Age = m_Timescales[static_cast<int>(TIMESCALE::tP)];                                                                                                                                              // Set age appropriately
    }
 
-    // Lieke (intend to change something here)
-    double CoremassIncreaseFactor = 0.4/0.34; 
-
    // member functions - alphabetically
             double          CalculateCOCoreMassAtPhaseEnd() const                                                   { return (utils::Compare(m_COCoreMass, m_GBParams[static_cast<int>(GBP::McSN)]) >= 0 && utils::Compare(m_COCoreMass, m_Mass) < 0) ? m_COCoreMass : m_Mass; }
-            double          CalculateCOCoreMassOnPhase() const                                                      { return CalculateCoreMassOnPhase(CoremassIncreaseFactor * m_Mass0, m_Age); }                                    // McCO(TPAGB) = Mc(TPAGB)Same as on phase
+            double          CalculateCOCoreMassOnPhase() const                                                      { return CalculateCoreMassOnPhase(OPTIONS->Core_Mass_Multiplier() * m_Mass0, m_Age); }                                    // McCO(TPAGB) = Mc(TPAGB)Same as on phase
 
             double          CalculateCoreMassAtPhaseEnd() const                                                     { return m_CoreMass; }                                                                  // NO-OP
             double          CalculateCoreMassOnPhase(const double p_Mass, const double p_Time) const;
-            double          CalculateCoreMassOnPhase() const                                                        { return CalculateCoreMassOnPhase(m_Mass0, m_Age); }                                    // Use class member variables
+            double          CalculateCoreMassOnPhase() const                                                        { return CalculateCoreMassOnPhase(OPTIONS->Core_Mass_Multiplier() *m_Mass0, m_Age); }                                    // Use class member variables
 
             double          CalculateGyrationRadius() const                                                         { return 0.1; }                                                                         // Hurley et al., 2000, after eq 109 for giants. Single number approximation.
 

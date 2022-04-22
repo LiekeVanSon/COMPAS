@@ -349,6 +349,8 @@ void Options::OptionValues::Initialise() {
     m_OverallWindMassLossMultiplier                                 = 1.0;
     m_WolfRayetFactor                                               = 1.0;
 
+    // Core mass (overshooting-ish)
+    m_Core_Mass_Multiplier                                          = 1.0;
 
     // Mass transfer options
     m_UseMassTransfer                                               = true;
@@ -673,6 +675,11 @@ bool Options::AddOptions(OptionValues *p_Options, po::options_description *p_Opt
             "cool-wind-mass-loss-multiplier",                           
             po::value<double>(&p_Options->m_CoolWindMassLossMultiplier)->default_value(p_Options->m_CoolWindMassLossMultiplier),                                                                  
             ("Multiplicative constant for wind mass loss of cool stars (default = " + std::to_string(p_Options->m_CoolWindMassLossMultiplier)+ ")").c_str()
+        )
+        (
+            "core-mass-multiplier",                           
+            po::value<double>(&p_Options->m_Core_Mass_Multiplier)->default_value(p_Options->m_Core_Mass_Multiplier),                                                                  
+            ("Multiplicative constant to increase the core mass throughout (not very self-consistent) (default = " + std::to_string(p_Options->m_Core_Mass_Multiplier)+ ")").c_str()
         )
         (
             "debug-to-file",                                               
@@ -1972,6 +1979,8 @@ std::string Options::OptionValues::CheckAndSetOptions() {
         COMPLAIN_IF(m_CommonEnvelopeMassAccretionMin < 0.0, "Minimum accreted mass (--common-envelope-mass-accretion-min) < 0");
 
         COMPLAIN_IF(m_CoolWindMassLossMultiplier < 0.0, "Wind mass loss multiplier for cool stars (--cool-wind-mass-loss-multiplier) < 0.0");
+
+        COMPLAIN_IF(m_Core_Mass_Multiplier < 0.0, "Core mass multiplier (--core-mass-multiplier) < 0.0");
 
         COMPLAIN_IF(m_DebugLevel < 0, "Debug level (--debug-level) < 0");
 

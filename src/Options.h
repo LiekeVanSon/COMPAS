@@ -677,6 +677,10 @@ public:
             double                                              m_CoolWindMassLossMultiplier;                                   // Multiplication factor to reduce cool wind mass loss rate at each timestep
             double                                              m_OverallWindMassLossMultiplier;                                // Multiplication factor to reduce the overall wind mass loss rate at each timestep
 
+            // Core mass (overshooting-ish)
+            double                                              m_Core_Mass_Multiplier;                                          // Multiplication factor to increase the core mass (not very self consistent)
+            
+
             // Eccentricity
             double                                              m_Eccentricity;                                                 // Eccentricity
             ENUM_OPT<ECCENTRICITY_DISTRIBUTION>                 m_EccentricityDistribution;                                     // Which eccentricity distribution
@@ -1128,6 +1132,8 @@ public:
     double                                      CommonEnvelopeSlopeKruckow() const                                      { return OPT_VALUE("common-envelope-slope-kruckow", m_CommonEnvelopeSlopeKruckow, true); }
 
     double                                      CoolWindMassLossMultiplier() const                                      { return OPT_VALUE("cool-wind-mass-loss-multiplier", m_CoolWindMassLossMultiplier, true); }
+
+    double                                      Core_Mass_Multiplier() const                                            { return OPT_VALUE("core-mass-multiplier", m_Core_Mass_Multiplier, true); }
 
     std::vector<std::string>                    DebugClasses() const                                                    { return m_CmdLine.optionValues.m_DebugClasses; }
     int                                         DebugLevel() const                                                      { return m_CmdLine.optionValues.m_DebugLevel; }

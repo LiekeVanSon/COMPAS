@@ -2083,6 +2083,8 @@ enum class PROGRAM_OPTION: int {
 
     COOL_WIND_MASS_LOSS_MULTIPLIER,
 
+    CORE_MASS_MULTIPLIER,
+
     ECCENTRICITY,
     ECCENTRICITY_DISTRIBUTION,
     ECCENTRICITY_DISTRIBUTION_MAX,
@@ -2294,6 +2296,8 @@ const COMPASUnorderedMap<PROGRAM_OPTION, std::string> PROGRAM_OPTION_LABEL = {
     { PROGRAM_OPTION::COMMON_ENVELOPE_SLOPE_KRUCKOW,                    "COMMON_ENVELOPE_SLOPE_KRUCKOW" },
 
     { PROGRAM_OPTION::COOL_WIND_MASS_LOSS_MULTIPLIER,                   "COOL_WIND_MASS_LOSS_MULTIPLIER" },
+
+    { PROGRAM_OPTION::CORE_MASS_MULTIPLIER,                             "CORE_MASS_MULTIPLIER" },
 
     { PROGRAM_OPTION::ECCENTRICITY,                                     "ECCENTRICITY" },
     { PROGRAM_OPTION::ECCENTRICITY_DISTRIBUTION,                        "ECCENTRICITY_DISTRIBUTION" },
@@ -2785,6 +2789,8 @@ const std::map<PROGRAM_OPTION, PROPERTY_DETAILS> PROGRAM_OPTION_DETAIL = {
     { PROGRAM_OPTION::COMMON_ENVELOPE_SLOPE_KRUCKOW,                        { TYPENAME::DOUBLE,         "CE_Slope_Kruckow",             "-",                14, 6 }},
 
     { PROGRAM_OPTION::COOL_WIND_MASS_LOSS_MULTIPLIER,                       { TYPENAME::DOUBLE,         "Cool_WindMassLoss_Multipl",    "-",                14, 6 }},
+
+    { PROGRAM_OPTION::CORE_MASS_MULTIPLIER,                                 { TYPENAME::DOUBLE,         "Core_Mass_Multiplier",         "-",                14, 6 }},
 
     { PROGRAM_OPTION::ECCENTRICITY,                                         { TYPENAME::DOUBLE,         "Eccentricity",                 "-",                14, 6 }},
     { PROGRAM_OPTION::ECCENTRICITY_DISTRIBUTION,                            { TYPENAME::INT,            "Eccentricity_Dstrbtn",         "-",                 4, 1 }},

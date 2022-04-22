@@ -582,18 +582,6 @@ double HG::CalculateCoreMassOnPhase(const double p_Mass, const double p_Time) co
     double McEHG = CalculateCoreMassAtPhaseEnd(p_Mass);
     double rhoHG = CalculateRho(p_Mass);
     double tau   = (p_Time - timescales(tMS)) / (timescales(tBGB) - timescales(tMS));
-    double fcore;
-
-
-    SAY("\n in HG.cpp  - CalculateCoreMassOnPhase"  );
-
-    // Lieke: I want to mimic overshooting with some f_core. 
-    SAY("\n Core mass - " <<   rhoHG * McEHG );
-    fcore = (rhoHG * McEHG)/p_Mass;
-    // SAY("\n Core mass fraction = " << fcore );
-
-    // Increase the core mass but make sure it doesn't exceed the mass
-    McEHG = std::min( McEHG, p_Mass) ;
 
     // If the star is losing mass, choose core mass as the maximum of the core mass
     // at the previous time-step and the value given by Hurley et al. 2000, eq 30

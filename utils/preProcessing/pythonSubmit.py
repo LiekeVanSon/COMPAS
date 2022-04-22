@@ -185,6 +185,8 @@ class pythonProgramOptions:
     cool_wind_mass_loss_multiplier = 1.0
     check_photon_tiring_limit = False
 
+    core_mass_multiplier = 1.0                                     # Hack created to increase core mass (does not change L, T and R properly at phase)
+
     circularise_binary_during_mass_transfer = True
     angular_momentum_conservation_during_circularisation = False
     mass_transfer_angular_momentum_loss_prescription = 'ISOTROPIC'
@@ -420,6 +422,7 @@ class pythonProgramOptions:
             self.overall_wind_mass_loss_multiplier,
             self.wolf_rayet_multiplier,
             self.cool_wind_mass_loss_multiplier,
+            self.core_mass_multiplier,
             self.mass_transfer_fa,
             self.mass_transfer_jloss,
             self.maximum_evolution_time,
@@ -511,6 +514,7 @@ class pythonProgramOptions:
             '--overall-wind-mass-loss-multiplier',
             '--wolf-rayet-multiplier',
             '--cool-wind-mass-loss-multiplier',
+            '--core-mass-multiplier',
             '--mass-transfer-fa',
             '--mass-transfer-jloss',
             '--maximum-evolution-time',
