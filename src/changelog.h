@@ -1344,7 +1344,7 @@
 //                                      - Changed the prescription for Tonset in the Picker+ models to take advantage of improved metallicity-dependent fits
 // 03.05.02   IM - Oct 10, 2024     - Enhancement, defect repair:
 //                                      - Reverted IsCCSN() to include USSN following a change in 3.00.00 that inadvertently led to no binary orbit updates following USSNe
-//                                      - Include a call to EvolveBinary(0.0) on initialisation of evolved stellar types; this ensures that Switch logs include consistent data for the new stellar type
+//                                      - Include a call to EvolveOnPhase(0.0) on initialisation of evolved stellar types; this ensures that Switch logs include consistent data for the new stellar type
 // 03.06.00   IM - Oct 14, 2024     - Enhancement, code cleanup:
 //                                      - Incorporating the Maltsev+ (2024) prescription for supernova remnant masses
 //                                      - Minor fixes, including in fallback fraction for Schneider SN prescription, documentation
@@ -1387,7 +1387,66 @@
 //                                      - Associated code clean-up
 // 03.08.01   IM - Nov 19, 2024     - Defect repairs
 //                                      - Multiple rotation-related fixes to 03.08.01 (units, initialisation, min->max typo, retain omega on envelope loss)
+// 03.08.02  RTW - Nov 18, 2024     - Enhancement:
+//                                      - Added new critical mass ratio tables for He stars from Ge et al. team
+//                                      - Cleaned up the stability calculation for H-rich stars as well, specifically implementing nearest neighbor for extrapolation
+//                                      - Now all of their results from Papers I-V are included (including those requested in private comm.)
+// 03.08.03   VK - Nov 20, 2024     - Defect repair:
+//                                      - Fixed behavior for core spin to be retained after envelope loss
+// 03.08.04   IM - Nov 25, 2024     - Defect repair:
+//                                      - Recalculate timescales when updating stellar age after mass loss (addresses issue #1231)
+// 03.09.00   IM - Nov 25, 2024     - Defect repair, enhancement
+//                                      - The nuclear timescale mass transfer rate is now set by the requirement that the star ends the time step just filling its Roche lobe (addresses issue #1285)
+//                                      - Fix an issue with the root finder for fitting into the RL that led to artificial failures to find a root
+//                                      - Fix issue (likely introduced in 03.08.00) with the accretor not gaining mass appropriately
+// 03.09.01  RTW - Nov 27, 2024     - Enhancement:
+//                                      - Added systemic velocity components x, y, and z to the output
+// 03.09.02  RTW - Nov 27, 2024     - Defect repair, enhancement:
+//                                      - Fixed bugs in vector3d related to indexing and rotation
+//                                      - Added tweak for circular systems at first SN, to fix the x-axis along the separation vector
+// 03.09.03   IM - Nov 28, 2024     - Enhancement, defect repair:
+//                                      - Delay changing stellar types until after checking for whether remnant cores would touch in a common enevelope, use core radii instead (partial fix to #1286)
+//                                      - Define a new function MainSequence::TAMSCoreMass(); use it for determining the amount of He in a star during MS mergers
+//                                      - Switch both stars to Massless remnants during a CE merger, resolve #1265
+//                                      - Minor fixes, including to #1255, #1258
+// 03.10.00   JR - Nov 29, 2024     - Enhancement:
+//                                      - added functionality to allow stellar mergers (for BSE) to be logged to switchlog file (see documentation for details)
+// 03.10.01   IM - Nov 30, 2024     - Defect repair:
+//                                      - corrected treatment of rotation to retain pre-mass-loss spin frequency, not angular momentum, on complete envelope removal during stable mass transfer
+//                                      - fixed issue with updating helium giants that manifested as supernovae with nan core mass (see #1245)
+//                                      - added check for exceeding Chandrasekhar mass when computing white dwarf radius (resolves issue #1264)
+//                                      - added check to only compute McBGB for stars with mass above MHeF, following text above Eq. 44 in Hurley+, 2000 (resolves issue #1256)
+// 03.10.02   IM - Dec 13, 2024     - Defect repair:
+//                                      - if the Hurley supernova criteria are met yet ECSN criteria based on mass transfer history are not met, a normal CCSN ensues as opposed to an ONeWD
+//                                      - exactly preserve the product of semi-major axis * total mass on wind mass loss
+// 03.10.03   JR - Dec 16, 2024     - Defect repair:
+//                                      - fix for issue #1310 - run terminates prematurely if error in grid file
+// 03.10.04  RTW - Nov 27, 2024     - Defect repair:
+//                                      - fix for issue #1247 - SN Euler angles had incomplete logic, leading to a div by zero in some cases
+// 03.10.05   JR - Jan 08, 2025     - Defect repair:
+//                                      - fix for issue #1317 - SN events not always logged in BSE SN file when evolving MS merger products
+//                                      - added code to ensure final BSE detailed output file TIMESTEP_COMPLETED record is always logged
+//                                        (may duplicate FINAL_STATE record, but logging TIMESTEP_COMPLETED is consistent, and it's what most people look for) 
+// 03.10.06   VK - Jan 13, 2025     - Enhancement:
+//                                      - Modified the KAPIL2024 tides to ignore quadratic 'e' terms (for spin and separation evolution) if they spin up an already synchronized star.
+// 03.11.00   VK - Jan 14, 2025     - Enhancement, Defect repair:
+//                                      - Fix for issue #1303 - Reduction in production of BHBH from CHE, other CHE-related improvements.
+//                                      - Stars that have sufficiently rapid angular frequencies at ZAMS are now initialized as CHE stars, regardless of the tidal prescription.
+//                                      - At CHE initialization, stellar spin is set to orbital frequency, unless rotational frequency has been specified by user. This process does not conserve angular momentum (implicitly assuming spin-up in the pre-ZAMS phase).
+//                                      - When checking for CHE, compare threshold frequency against orbit rather than stellar spin, in case the star has zero frequency (no tides, no user-specified value).
+//                                      - Moved all CHE rotation related code to ProcessTides(), ensuring that any spin up during binary evolution conserves total angular momentum.
+// 03.12.00   AB - Jan 16, 2025     - Enhancement:
+//                                      - Added Shikauchi et al. (2024) core mass prescription, describing convective core evolution under mass loss/gain
+//                                      - New options: --main-sequence-core-mass-prescription SHIKAUCHI (new prescription), MANDEL (replaces --retain-core-mass-during-caseA-mass-transfer),
+//                                        ZERO (main sequence core mass set to zero, no treatment)
+//                                      - Added new luminosity prescription for main sequence stars from Shikauchi et al. (2024)
+//                                      - Added treatment for rejuvenation of main sequence accretors when the new prescription is used
+// 03.12.01   JR - Jan 17, 2025     - Defect repair:
+//                                      - (partial?) fix for issue #1149 - remove conditional from TPAGB::IsSupernova().  Whether it fixes issue 1149 completely or not, the conditional shouldn't be there...
+// 03.12.02   SS - Jan 20, 2025     - Defect repair:
+//                                      -  fix for issue #1324 - allow for evolution of pulsars formed from main sequence merger products. Changed CalculateTimestep to ChooseTimestep in MR.h and added check for bound binary to BaseBinaryStar::ChooseTimestep
 
-const std::string VERSION_STRING = "03.08.01";
+
+const std::string VERSION_STRING = "03.12.02";
 
 # endif // __changelog_h__

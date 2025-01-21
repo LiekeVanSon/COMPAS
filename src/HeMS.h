@@ -52,6 +52,8 @@ public:
     static DBL_DBL  CalculateRadiusAtPhaseEnd_Static(const double p_Mass, const double p_Luminosity);
     static double   CalculateRadiusAtZAMS_Static(const double p_Mass);
     static double   CalculateRadiusOnPhase_Static(const double p_Mass, const double p_Tau);
+    
+           double   CalculateRemnantRadius() const                                                                  { return Radius(); }
 
     MT_CASE         DetermineMassTransferTypeAsDonor() const                                                        { return MT_CASE::OTHER; }                                                      // Not A, B, C, or NONE
 
@@ -148,6 +150,10 @@ protected:
             STELLAR_TYPE    EvolveToNextPhase();
 
             ENVELOPE        DetermineEnvelopeType() const                                                           { return ENVELOPE::RADIATIVE; }                                                 // Always RADIATIVE
+
+            double          InterpolateGeEtAlQCrit(const QCRIT_PRESCRIPTION p_qCritPrescription, 
+                                                   const double p_massTransferEfficiencyBeta)                       { return InterpolateGeEtAlQCrit(); }                                            // The function arguments are irrelavant for He stars, for now
+            double          InterpolateGeEtAlQCrit(); 
 
             bool            IsEndOfPhase() const                                                                    { return !ShouldEvolveOnPhase(); }
             bool            IsSupernova() const                                                                     { return false; }                                                               // Not here

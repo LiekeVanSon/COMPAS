@@ -3,19 +3,43 @@ What's new
 
 Following is a brief list of important updates to the COMPAS code.  A complete record of changes can be found in the file ``changelog.h``.
 
+**03.12.00 Jan 16, 2025**
+
+* Added convective core mass prescription for main sequence stars from Shikauchi+ (2024), describing how the core mass evolves under mass loss and mass gain.
+* New command line option ``--main-sequence-core-mass-prescription`` with arguments ``SHIKAUCHI`` (new prescription), ``MANDEL`` (replaces the functionality of ``--retain-core-mass-during-caseA-mass-transfer``), and ``ZERO`` (core mass set to zero, no treatment).
+* Added new luminosity prescription for main sequence stars from Shikauchi+ (2024).
+* Added treatment for rejuvenation of main sequence accretors when the new prescription is used.
+
+**03.10.00 Nov 29, 2024**
+
+Added functionality to log stellar mergers in the BSE switchlog file.
+Switchlog merger records come in pairs (one for each star) so that the stellar type of each star is recorded.
+
+**03.09.00 Nov 28, 2024**
+
+Improved nuclear timescale mass transfer: the nuclear timescale mass transfer rate is now set by the requirement that the star 
+ends the time step just filling its Roche lobe.
+Fixed several significant mass-transfer issues, such as accretors not gaining mass appropriately and failures
+in the root solver for fitting the star into the Roche lobe that were leading to artificial common envelopes and mergers.
+
+**03.08.02 Nov 18, 2024**
+
+Updated implementation of the mass transfer stability critical mass ratio tables from the team of Hongwei Ge.
+We now use all the most up to do date tables they've produced (public or otherwise) from Papers I-V, including
+variations for adiabatic and isentropic treatments, variable accretion efficiency, and two different metallicities, 
+as well as for He stars (albeit only for adiabatic, fully conservative, solar metallicity stars). 
+
 **03.08.00 Nov 18, 2024**
 
 Improved the treatment of stellar rotation (with further corrections in 03.08.01):
 
 * Assume rigid body rotation
 * Keep the angular moment of a star constant when there is no mass loss
-* When a star with radius r and angular frequency omega loses mass dm through winds or mass transfer, it loses angular momentum dL = 
-(2/3) dm r^2 omega
+* When a star with radius r and angular frequency omega loses mass dm through winds or mass transfer, it loses angular momentum dL = (2/3) dm r^2 omega
 * (However, angular momentum never drops below zero)
 * When a star loses its envelope, the remaining core is assumed to rotate with the same rotation rate as the preceding star
 * When a star of mass m and radius r gains mass dm through accretion, it gain angular momentum dL = dm \sqrt{G m r}
-* If initial binary rotation is fast enough for a star to be CHE, it is set to that rotation frequency without regard for the tidal 
-prescription; CHE stars remain tidally locked if the tidal prescription is NONE
+* If initial binary rotation is fast enough for a star to be CHE, it is set to that rotation frequency without regard for the tidal prescription; CHE stars remain tidally locked if the tidal prescription is NONE
 
 **03.07.01 Oct 23, 2024**
 

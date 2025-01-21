@@ -5,7 +5,7 @@ Any program options that are not specified take default values.
 
 - On the command line, program options that are not explicitly specified default to the COMPAS default value for the option (as specified in the COMPAS code - may be sampled from a distribution).
 
-- On a :doc:`grid file <../grid-files>` line, program options that are not explicitly specified default to the value specified for that option on the command line. If the program option was not explicitly specified on the command line, it will default to the COMPAS default value for the option, as described above. That is, the value for any option not specified on a grid file line option falls back to the value specified on the command line, which falls back to the COMPAS default if it was not specified on the command line.
+- On a :doc:`grid file <../Running COMPAS/running-grid>` line, program options that are not explicitly specified default to the value specified for that option on the command line. If the program option was not explicitly specified on the command line, it will default to the COMPAS default value for the option, as described above. That is, the value for any option not specified on a grid file line option falls back to the value specified on the command line, which falls back to the COMPAS default if it was not specified on the command line.
 
 
 .. _options-props-top:
@@ -311,11 +311,11 @@ Default = 1.28
 
 **--critical-mass-ratio-prescription** |br|
 Critical mass ratio stability prescription (if any). |br|
-Options: { NONE, ZERO, CLAEYS, GE20, GE20_IC, HURLEY_HJELLMING_WEBBINK } |br|
+Options: { NONE, ZERO, CLAEYS, GE, GE_IC, HURLEY_HJELLMING_WEBBINK } |br|
 ``NONE``    defaults to the zeta prescription for stability. |br|
 ``CLAEYS``  uses qCrit values from Claeys et al. 2014. |br|
-``GE20``    uses qCrit values from Ge et al. 2020 (adiabatic assumption). |br|
-``GE20_IC`` uses qCrit values from Ge et al. 2020 (isentropic envelope assumption). |br|
+``GE``      uses qCrit values from Ge et al. series (Papers I-V) (adiabatic assumption). |br|
+``GE_IC``   uses qCrit values from Ge et al. series (Papers I-V) (isentropic envelope assumption). |br|
 ``HURLEY_HJELLMING_WEBBINK`` uses qCrit values from Hurley et al. 2002 (Hjellming & Webbink 1987 for mass transfer from a giant primary). |br|
 Warning: if running with ``--critical-mass-ratio-prescription``, zetas will not be computed, so should not be trusted in the outputs. |br|
 Default = NONE |br|
@@ -462,7 +462,7 @@ Default = 5.75
 :ref:`Back to Top <options-props-top>`
 
 **--grid** |br|
-Grid filename. (See :doc:`Grid files <../grid-files>`) |br|
+Grid filename. (See :doc:`grid file <../Running COMPAS/running-grid>`) |br|
 Default = ’’ (None)
 
 **--grid-lines-to-process** |br|
@@ -795,6 +795,15 @@ Default = 4.2
 
 :ref:`Back to Top <options-props-top>`
 
+**--main-sequence-core-mass-prescription** |br|
+Main sequence core mass prescription. |br|
+Options: {ZERO, MANDEL, SHIKAUCHI} |br|
+``ZERO``      : No core mass treatment, set to zero |br|
+``MANDEL``    : The core following case A mass transfer is set equal to the expected core mass of a newly formed HG star
+ with mass equal to that of the donor, scaled by the fraction of the donor's MS lifetime at mass transfer |br|
+``SHIKAUCHI`` : Core mass according to Shikauchi et al. (2024) |br|
+Default = MANDEL |br|
+
 **--mass-change-fraction** |br|
 Approximate desired fractional change in stellar mass on phase when setting SSE and BSE timesteps (applied before ``--timestep--multiplier``). |br|
 Recommended value is 0.005. |br|
@@ -847,8 +856,8 @@ Options: { JEANS, ISOTROPIC, CIRCUMBINARY, MACLEOD_LINEAR, ARBITRARY } |br|
 Default = ISOTROPIC
 
 **--mass-transfer-fa** |br|
-Mass Transfer fraction accreted. |br|
-Used when ``--mass-transfer-accretion-efficiency-prescription = FIXED_FRACTION``. |br|
+Mass Transfer fraction accreted (beta). |br|
+Used when ``--mass-transfer-accretion-efficiency-prescription = FIXED``. |br|
 Default = 0.5
 
 **--mass-transfer-jloss** |br|
@@ -1122,10 +1131,11 @@ Enable mass loss due to pulsational-pair-instability (PPI). |br|
 Default = TRUE
 
 **--pulsational-pair-instability-prescription** |br|
-Pulsational pair instability prescription. |br|
+Pulsational pair instability prescription (only relevant when using ``--pulsational-pair-instability``). |br|
 Options: { HENDRIKS, COMPAS, STARTRACK, MARCHANT, FARMER } |br|
 ``HENDRIKS`` implements the prescription from Hendriks et al. 2023 |br|
-``COMPAS``, ``STARTRACK`` and ``MARCHANT`` follow Woosley 2017, Belczynski et al. 2016, and Marchant et al. 2018, all as implemented in Stevenson et al. 2019. |br|
+``COMPAS``, ``STARTRACK`` and ``MARCHANT`` follow Woosley 2017, Belczynski et al. 2016, and Marchant et al. 2018, 
+all as implemented in Stevenson et al. 2019. |br|
 ``FARMER`` follows Farmer et al. 2019 |br|
 Default = MARCHANT
 
@@ -1160,7 +1170,8 @@ Default = MULLERMANDEL
 If TRUE, preserve a larger donor core mass following case A mass transfer. |br|
 The core is set equal to the expected core mass of a newly formed HG star with mass equal to that of the donor,
 scaled by the fraction of the donor's MS lifetime at mass transfer. |br|
-Default = TRUE
+Default = TRUE |br|
+DEPRECATION NOTICE: this option has been deprecated and will soon be removed. Please use ``--main-sequence-core-mass-prescription MANDEL`` in future.
 
 **--revised-energy-formalism-nandez-ivanova** |br|
 Enable revised energy formalism of Nandez & Ivanova. |br|
@@ -1417,7 +1428,7 @@ Go to :ref:`the top of this page <options-props-top>` for the full alphabetical 
 **Stellar evolution and winds**
 
 --use-mass-loss, --check-photon-tiring-limit, --cool-wind-mass-loss-multiplier, --luminous-blue-variable-prescription, --LBV-mass-loss-prescription
---luminous-blue-variable-multiplier, --mass-loss-prescription, --overall-wind-mass-loss-multiplier, --wolf-rayet-multiplier, 
+--luminous-blue-variable-multiplier, --main-sequence-core-mass-prescription, --mass-loss-prescription, --overall-wind-mass-loss-multiplier, --wolf-rayet-multiplier, 
 --expel-convective-envelope-above-luminosity-threshold, --luminosity-to-mass-threshold,
 --OB-mass-loss, --OB-mass-loss-prescription, --RSG-mass-loss, --RSG-mass-loss-prescription, --VMS-mass-loss, --vms-mass-loss-prescription, --WR-mass-loss, --WR-mass-loss-prescription
 

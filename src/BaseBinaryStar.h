@@ -189,6 +189,7 @@ public:
                                                                     }
     bool                IsNSandBH() const                           { return HasOneOf({STELLAR_TYPE::NEUTRON_STAR}) && HasOneOf({STELLAR_TYPE::BLACK_HOLE}); }
     bool                IsNSandNS() const                           { return HasTwoOf({STELLAR_TYPE::NEUTRON_STAR}); }
+    bool                IsMRandNS() const                           { return HasOneOf({STELLAR_TYPE::NEUTRON_STAR}) && HasOneOf({STELLAR_TYPE::MASSLESS_REMNANT}); }
     bool                IsMRandRemant() const                       { return HasOneOf({STELLAR_TYPE::MASSLESS_REMNANT}) && HasOneOf({STELLAR_TYPE::HELIUM_WHITE_DWARF, STELLAR_TYPE::CARBON_OXYGEN_WHITE_DWARF, STELLAR_TYPE::OXYGEN_NEON_WHITE_DWARF, STELLAR_TYPE::NEUTRON_STAR, STELLAR_TYPE::BLACK_HOLE}); }
     bool                IsUnbound() const                           { return (utils::Compare(m_SemiMajorAxis, 0.0) <= 0 || (utils::Compare(m_Eccentricity, 1.0) > 0)); }         // semi major axis <= 0.0 means unbound, presumably by SN)
     bool                IsWDandWD() const                           { return HasTwoOf({STELLAR_TYPE::HELIUM_WHITE_DWARF, STELLAR_TYPE::CARBON_OXYGEN_WHITE_DWARF, STELLAR_TYPE::OXYGEN_NEON_WHITE_DWARF}); }
@@ -246,6 +247,9 @@ public:
     SN_STATE            SN_State() const                            { return m_SupernovaState; }
     double              SynchronizationTimescale() const            { return m_SynchronizationTimescale; }
     double              SystemicSpeed() const                       { return m_SystemicVelocity.Magnitude(); }
+    double              SystemicVelocityX() const                   { return m_SystemicVelocity.xValue(); }
+    double              SystemicVelocityY() const                   { return m_SystemicVelocity.yValue(); }
+    double              SystemicVelocityZ() const                   { return m_SystemicVelocity.zValue(); }
     double              Time() const                                { return m_Time; }
     double              TimeToCoalescence() const                   { return m_TimeToCoalescence; }
     double              TotalAngularMomentum() const                { return m_TotalAngularMomentum; }
@@ -264,10 +268,10 @@ public:
 
             EVOLUTION_STATUS       Evolve();
 
-            bool                   PrintSwitchLog(const bool p_PrimarySwitching) {                                      // print to the switch log file
+            bool                   PrintSwitchLog(const bool p_PrimarySwitching, const bool p_IsMerger = false) {       // print to the switch log file
                                        return OPTIONS->SwitchLog()                                                      // switch logging enabled?
                                            ? (LOGGING->ObjectSwitchingPersistence() == OBJECT_PERSISTENCE::PERMANENT    // yes, switch logging enabled - is this a 'permanent' object (i.e. not an ephemeral clone)?
-                                               ? LOGGING->LogBSESwitchLog(this, p_PrimarySwitching)                     // yes, permanent - log it
+                                               ? LOGGING->LogBSESwitchLog(this, p_PrimarySwitching, p_IsMerger)         // yes, permanent - log it
                                                : true                                                                   // no, ephemeral - ignore the log request
                                              )
                                            : true;                                                                      // no - switch logging not enabled - ignore the log request
@@ -501,7 +505,19 @@ private:
     void    UpdateSystemicVelocity(Vector3d p_newVelocity)                      { m_SystemicVelocity += p_newVelocity; } 
 
     // printing functions
-    
+
+    bool LogMergerToSwitchLog() {
+        // switchlog merger records come in pairs - one for each star
+        // record merger for primary
+        LOGGING->SetSwitchParameters(m_ObjectId, ObjectType(), m_ObjectPersistence, m_Star1->StellarType(), m_Star1->StellarType());        // store switch details to LOGGING service
+        if (PrintSwitchLog(true, true)) {                                                                                                   // record merger details to switchlog
+            // record merger for secondary
+            LOGGING->SetSwitchParameters(m_ObjectId, ObjectType(), m_ObjectPersistence, m_Star2->StellarType(), m_Star2->StellarType());    // store switch details to LOGGING service
+            return PrintSwitchLog(false, true);                                                                                             // record merger details to switchlog
+        }
+        return false;
+    }
+
     bool PrintRLOFParameters(const RLOF_RECORD_TYPE p_RecordType = RLOF_RECORD_TYPE::DEFAULT);
     
     bool PrintBinarySystemParameters(const BSE_SYSPARMS_RECORD_TYPE p_RecordType = BSE_SYSPARMS_RECORD_TYPE::DEFAULT) const { 
@@ -539,12 +555,13 @@ private:
      *
      *
      * Constructor: initialise the class
-     * template <class T> RadiusEqualsRocheLobeFunctor(BaseBinaryStar *p_Binary, BinaryConstituentStar *p_Donor, BinaryConstituentStar *p_Accretor, double p_FractionAccreted)
+     * template <class T> RadiusEqualsRocheLobeFunctor(BaseBinaryStar *p_Binary, BinaryConstituentStar *p_Donor, BinaryConstituentStar *p_Accretor, double p_FractionAccreted, double p_MaximumAccretedMass, ERROR *p_Error)
      *
      * @param   [IN]    p_Binary                    (Pointer to) The binary star under examination
      * @param   [IN]    p_Donor                     (Pointer to) The star donating mass
      * @param   [IN]    p_Accretor                  (Pointer to) The star accreting mass
-     * @param   [IN]    p_FractionAccreted          The fraction of the donated mass accreted by the accretor
+     * @param   [IN]    p_FractionAccreted          The fraction of the donated mass accreted by the accretor (for thermal timescale accretion)
+     * @param   [IN]    p_MaximumAccretedMass       The total amount of mass that can be accreted (for nuclear timescale accretion, p_FractionAccreted should be negative for this to be used)
      * @param   [IN]    p_Error                     (Address of variable to record) Error encountered in functor
      * 
      * Function: calculate radius difference after mass loss
@@ -555,12 +572,13 @@ private:
      */    
     template <class T>
     struct RadiusEqualsRocheLobeFunctor {
-        RadiusEqualsRocheLobeFunctor(BaseBinaryStar *p_Binary, BinaryConstituentStar *p_Donor, BinaryConstituentStar *p_Accretor, double p_FractionAccreted, ERROR *p_Error) {
+        RadiusEqualsRocheLobeFunctor(BaseBinaryStar *p_Binary, BinaryConstituentStar *p_Donor, BinaryConstituentStar *p_Accretor, double p_FractionAccreted, double p_MaximumAccretedMass, ERROR *p_Error) {
             m_Binary           = p_Binary;
             m_Donor            = p_Donor;
             m_Accretor         = p_Accretor;
             m_Error            = p_Error;
             m_FractionAccreted = p_FractionAccreted;
+            m_MaximumAccretedMass = p_MaximumAccretedMass;
         }
         T operator()(double const& p_dM) {
 
@@ -572,11 +590,17 @@ private:
             double donorMass     = m_Donor->Mass();
             double accretorMass  = m_Accretor->Mass();
             
-            double semiMajorAxis = m_Binary->CalculateMassTransferOrbit(m_Donor->Mass(), -p_dM , *m_Accretor, m_FractionAccreted);
-            double RLRadius      = semiMajorAxis * (1.0 - m_Binary->Eccentricity()) * CalculateRocheLobeRadius_Static(donorMass - p_dM, accretorMass + (m_Binary->FractionAccreted() * p_dM)) * AU_TO_RSOL;
+            // beta is the actual accretion efficiency; if p_FractionAccreted is negative (placeholder
+            // for nuclear timescale accretion efficiency, for which the total accretion mass over the
+            // duration of the timestep is known), then the ratio of the maximum allowed accreted
+            // mass / donated mass is used
+            double beta = (utils::Compare(m_FractionAccreted, 0.0) >=0 ) ? m_FractionAccreted : std::min(m_MaximumAccretedMass/p_dM, 1.0);
+            
+            double semiMajorAxis = m_Binary->CalculateMassTransferOrbit(donorMass, -p_dM , *m_Accretor, beta);
+            double RLRadius      = semiMajorAxis * (1.0 - m_Binary->Eccentricity()) * CalculateRocheLobeRadius_Static(donorMass - p_dM, accretorMass + (beta * p_dM)) * AU_TO_RSOL;
             
             double radiusAfterMassLoss = m_Donor->CalculateRadiusOnPhaseTau(donorMass-p_dM, m_Donor->Tau());
-                        
+            
             return (RLRadius - radiusAfterMassLoss);
         }
     private:
@@ -585,10 +609,11 @@ private:
         BinaryConstituentStar *m_Accretor;
         ERROR                 *m_Error;
         double                 m_FractionAccreted;
+        double                 m_MaximumAccretedMass;
     };
 
 
-    double MassLossToFitInsideRocheLobe(BaseBinaryStar *p_Binary, BinaryConstituentStar *p_Donor, BinaryConstituentStar *p_Accretor, double p_FractionAccreted);
+    double MassLossToFitInsideRocheLobe(BaseBinaryStar *p_Binary, BinaryConstituentStar *p_Donor, BinaryConstituentStar *p_Accretor, double p_FractionAccreted, double p_MaximumAccretedMass);
     
     double OmegaAfterSynchronisation(const double p_M1, const double p_M2, const double p_I1, const double p_I2, const double p_Ltot, const double p_Guess);
     

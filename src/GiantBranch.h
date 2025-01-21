@@ -20,9 +20,8 @@ public:
     GiantBranch(){};
     
     GiantBranch(const BaseStar &p_BaseStar) : BaseStar(p_BaseStar), MainSequence(p_BaseStar) {}
-
-    virtual double          CalculateRemnantRadius() const;
-
+    
+    double          CalculateRemnantRadius() const;
 
 protected:
 
@@ -136,7 +135,7 @@ protected:
 
             void            UpdateInitialMass() { }                                                                                                                             // NO-OP for most stellar types
     
-            void            UpdateMinimumCoreMass() { }                                                                                                                         // NO-OP for most stellar types
+            void            UpdateMainSequenceCoreMass(const double p_Dt, const double p_TotalMassLossRate) { }                                                                 // NO-OP for most stellar types
 
 };
 
