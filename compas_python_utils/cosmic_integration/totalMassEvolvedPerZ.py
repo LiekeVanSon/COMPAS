@@ -77,22 +77,39 @@ def get_COMPAS_fraction(m1_low, m1_upp, m2_low, f_bin, mass_ratio_pdf_function=l
     fraction
         The fraction of mass in a COMPAS population relative to the total Universal population
     """ 
+    # Step 0: define mass bins and corresponding binary fractions
+    # Values chosen to approximately follow Figure 1 from Offner et al. (2023)
+    binary_bin_edges = [m1, 0.08, 0.5, 1, 10, m4]
+    binaryFractions = [0.1, 0.25, 0.5, 0.75, 1]
+
+    def get_binary_fraction(mass):
+        for i in range(len(binary_bin_edges) - 1):
+            if binary_bin_edges[i] <= mass < binary_bin_edges[i + 1]:
+                return binaryFractions[i]
+        return 0  # Default value if mass is out of range
+
+    
     # first, for normalisation purposes, we can find the integral with no COMPAS cuts
     def full_integral(mass, m1, m2, m3, m4, a12, a23, a34):
         primary_mass = IMF(mass, m1, m2, m3, m4, a12, a23, a34) * mass
-        
+        if f_bin is None:
+            f_bin = get_binary_fraction(mass)
+
         # find the expected companion mass given the mass ratio pdf function
         expected_secondary_mass = quad(lambda q: q * mass_ratio_pdf_function(q), 0, 1)[0] * primary_mass
         
         single_stars = (1 - f_bin) * primary_mass
         binary_stars = f_bin * (primary_mass + expected_secondary_mass)
         return single_stars + binary_stars
+    
     full_mass = quad(full_integral, m1, m4, args=(m1, m2, m3, m4, a12, a23, a34))[0]
     
     # now we do a similar integral but for the COMPAS regime
     def compas_integral(mass, m2_low, f_bin, m1, m2, m3, m4, a12, a23, a34):
         # define the primary mass in the same way
         primary_mass = IMF(mass, m1, m2, m3, m4, a12, a23, a34) * mass
+        if f_bin is None:
+            f_bin = get_binary_fraction(mass)
         
         # find the fraction that are below the m2 mass cut
         f_below_m2low = quad(mass_ratio_pdf_function, 0, m2_low / mass)[0]
@@ -102,7 +119,9 @@ def get_COMPAS_fraction(m1_low, m1_upp, m2_low, f_bin, mass_ratio_pdf_function=l
         
         # return total mass of binary stars that have m2 above the cut
         return f_bin * (1 - f_below_m2low) * (primary_mass + expected_secondary_mass)
+    
     compas_mass = quad(compas_integral, m1_low, m1_upp, args=(m2_low, f_bin, m1, m2, m3, m4, a12, a23, a34))[0]
+    
     return compas_mass / full_mass
 
 
