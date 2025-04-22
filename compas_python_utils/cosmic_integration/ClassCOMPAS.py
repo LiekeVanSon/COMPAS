@@ -132,27 +132,28 @@ class COMPASData(object):
         self.allTypesMask = type_masks["all"] * hubble_mask * rlof_mask * pessimistic_mask
         self.optimisticmask = pessimistic_mask
 
-    def setGridAndMassEvolved(self):
-        # The COMPAS simulation does not evolve all stars
-        # give me the correction factor for the total mass evolved
-        # I assume each metallicity has the same limits, and does correction
-        # factor, but the total mass evolved might be different.
-        # This does not change when we change types and other masks this is
-        # general to the entire simulation so calculate once
-        _, self.totalMassEvolvedPerZ = MPZ.totalMassEvolvedPerZ(
-            path=self.path,
-            Mlower=self.Mlower,
-            Mupper=self.Mupper,
-            binaryFraction=self.binaryFraction,
-        )
-        # Want to recover entire metallicity grid, assume that every metallicity
-        # evolved shows in all systems again should not change within same run
-        # so dont redo if we reset the data
-        Data = h5.File(self.path, "r")
-        if self.initialZ is None:
-            self.initialZ = Data["BSE_System_Parameters"]["Metallicity@ZAMS(1)"][()]
-        self.metallicityGrid = np.unique(self.initialZ)
-        Data.close()
+# LvS: I wonder if removing this is a good idea, since the 
+    # def setGridAndMassEvolved(self):
+    #     # The COMPAS simulation does not evolve all stars
+    #     # give me the correction factor for the total mass evolved
+    #     # I assume each metallicity has the same limits, and does correction
+    #     # factor, but the total mass evolved might be different.
+    #     # This does not change when we change types and other masks this is
+    #     # general to the entire simulation so calculate once
+    #     _, self.totalMassEvolvedPerZ = MPZ.totalMassEvolvedPerZ(
+    #         path=self.path,
+    #         Mlower=self.Mlower,
+    #         Mupper=self.Mupper,
+    #         binaryFraction=self.binaryFraction,
+    #     )
+    #     # Want to recover entire metallicity grid, assume that every metallicity
+    #     # evolved shows in all systems again should not change within same run
+    #     # so dont redo if we reset the data
+    #     Data = h5.File(self.path, "r")
+    #     if self.initialZ is None:
+    #         self.initialZ = Data["BSE_System_Parameters"]["Metallicity@ZAMS(1)"][()]
+    #     self.metallicityGrid = np.unique(self.initialZ)
+    #     Data.close()
 
     def setCOMPASData(self):
         
@@ -186,17 +187,18 @@ class COMPASData(object):
             )
             self.Hubble = self.get_COMPAS_variables("BSE_Double_Compact_Objects", "Merges_Hubble_Time")[self.DCOmask]
 
-    def recalculateTrueSolarMassEvolved(self, Mlower, Mupper, binaryFraction):
-        # Possibility to test assumptions of True solar mass evolved
-        self.Mlower = Mlower
-        self.Mupper = Mupper
-        self.binaryFraction = binaryFraction
-        _, self.totalMassEvolvedPerZ = MPZ.totalMassEvolvedPerZ(
-            pathCOMPASh5=self.path,
-            Mlower=self.Mlower,
-            Mupper=self.Mupper,
-            binaryFraction=self.binaryFraction,
-        )
+# LvS: I think this is depricated 
+    # def recalculateTrueSolarMassEvolved(self, Mlower, Mupper, binaryFraction):
+    #     # Possibility to test assumptions of True solar mass evolved
+    #     self.Mlower = Mlower
+    #     self.Mupper = Mupper
+    #     self.binaryFraction = binaryFraction
+    #     _, self.totalMassEvolvedPerZ = MPZ.totalMassEvolvedPerZ(
+    #         pathCOMPASh5=self.path,
+    #         Mlower=self.Mlower,
+    #         Mupper=self.Mupper,
+    #         binaryFraction=self.binaryFraction,
+    #     )
 
     def get_COMPAS_variables(self, hdf5_file, var_names):
         """ 
