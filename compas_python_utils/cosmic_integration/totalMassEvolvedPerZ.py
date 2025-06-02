@@ -87,7 +87,6 @@ def get_COMPAS_fraction(m1_low, m1_upp, m2_low, f_bin, mass_ratio_pdf_function=l
             if binary_bin_edges[i] <= mass < binary_bin_edges[i + 1]:
                 return binaryFractions[i]
         return 0  # Default value if mass is out of range
-
     
     # first, for normalisation purposes, we can find the integral with no COMPAS cuts
     def full_integral(mass, m1, m2, m3, m4, a12, a23, a34):
@@ -238,18 +237,17 @@ def analytical_star_forming_mass_per_binary_using_kroupa_imf(
     # normalize IMF over the complete mass range:
     alpha = (-(m4**(-1.3)-m3**(-1.3))/1.3 - (m3**(-0.3)-m2**(-0.3))/(m3*0.3) + (m2**0.7-m1**0.7)/(m2*m3*0.7))**(-1)
 
-    # average mass of stars (average mass of all binaries is a factor of 1.5 larger)
+    # average mass of primary star (i.e., expected value of Kroupa IMF)
     m_avg = alpha * (-(m4**(-0.3)-m3**(-0.3))/0.3 + (m3**0.7-m2**0.7)/(m3*0.7) + (m2**1.7-m1**1.7)/(m2*m3*1.7))
 
-    # fraction of binaries that COMPAS simulates (i.e., N_binaries_in_COMPAS/N_binaries_in_universe) 
-    # second term assumes a flat mass ratio distribution with m2_max = m1_max
+    # fraction of binaries that COMPAS simulates (N_binaries_in_COMPAS/N_binaries_in_universe) 
+    # i.e.,  p(m1)p(m2|m1) dm1dm2, which can be rewritten as p(m1)p(q|m1) dm1dq, assuming a flat mass q dist with m2_max = m1_max
     fint = -alpha / 1.3 * (m1_max ** (-1.3) - m1_min ** (-1.3)) + alpha * m2_min / 2.3 * (m1_max ** (-2.3) - m1_min ** (-2.3))
 
-    # Average mass of systems (M_rep_by_all_binary_systems/N_binaries_in_universe)
-    # 1.5 = Average number of stars in single and binary systems, (1-fbin)/fbin) = ratio of single/binary systems
-    average_mass_per_binary = m_avg * (1.5 + (1-fbin)/fbin)
+    # average binary system mass <m1 + m2> = <m1><1+q> = 1.5 m_avg (M_rep_all_stellar_systems/N_stellar_systems_in_universe)
+    average_mass_of_all_systems = fbin*1.5*m_avg  + (1-fbin)*m_avg # average binary sys mass + average single star mass
 
     # mass represented by each binary simulated by COMPAS
-    # N_binaries_in_universe/N_binaries_in_COMPAS * M_rep_by_all_binary_systems/N_binaries_in_universe
-    m_rep = (1/fint) * average_mass_per_binary 
+    # N_binaries_in_universe/N_binaries_in_COMPAS * M_rep_all_stellar_systems/N_stellar_systems_in_universe *(N_stellar_systems_in_universe/N_binaries_in_universe)  
+    m_rep = (1/fint) * average_mass_of_all_systems * (1./fbin)
     return m_rep
