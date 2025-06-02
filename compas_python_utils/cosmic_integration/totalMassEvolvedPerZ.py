@@ -89,7 +89,7 @@ def get_COMPAS_fraction(m1_low, m1_upp, m2_low, f_bin, mass_ratio_pdf_function=l
         return 0  # Default value if mass is out of range
     
     # first, for normalisation purposes, we can find the integral with no COMPAS cuts
-    def full_integral(mass, m1, m2, m3, m4, a12, a23, a34):
+    def full_integral(mass, m1, m2, m3, m4, a12, a23, a34, f_bin):
         primary_mass = IMF(mass, m1, m2, m3, m4, a12, a23, a34) * mass
         if f_bin is None:
             f_bin = get_binary_fraction(mass)
@@ -101,7 +101,7 @@ def get_COMPAS_fraction(m1_low, m1_upp, m2_low, f_bin, mass_ratio_pdf_function=l
         binary_stars = f_bin * (primary_mass + expected_secondary_mass)
         return single_stars + binary_stars
     
-    full_mass = quad(full_integral, m1, m4, args=(m1, m2, m3, m4, a12, a23, a34))[0]
+    full_mass = quad(full_integral, m1, m4, args=(m1, m2, m3, m4, a12, a23, a34, f_bin))[0]
     
     # now we do a similar integral but for the COMPAS regime
     def compas_integral(mass, m2_low, f_bin, m1, m2, m3, m4, a12, a23, a34):
